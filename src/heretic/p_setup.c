@@ -442,6 +442,12 @@ void P_LoadLineDefs(int lump)
         ld->tag = SHORT(mld->tag);
         v1 = ld->v1 = &vertexes[(unsigned short)SHORT(mld->v1)]; // [crispy] extended nodes
         v2 = ld->v2 = &vertexes[(unsigned short)SHORT(mld->v2)]; // [crispy] extended nodes
+
+        if (ld->special == 85 || ld->special >= 108)
+        {
+            fprintf(stderr, "Found unsupported special %d\n", ld->special);
+        }
+
         ld->dx = v2->x - v1->x;
         ld->dy = v2->y - v1->y;
         if (!ld->dx)
@@ -848,6 +854,7 @@ void P_SetupLevel(int episode, int map, int playermask, skill_t skill)
     oldleveltime = 0;  // [crispy] Track if game is running
 
     lumpnum = W_GetNumForName(lumpname);
+    fprintf(stderr, "Loading map %s\n", lumpname);
 
     // [crispy] check and log map and nodes format
     crispy_mapformat = P_CheckMapFormat(lumpnum);

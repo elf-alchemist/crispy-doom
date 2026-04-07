@@ -29,6 +29,7 @@
 #include "i_timer.h" // [crispy] TICRATE
 #include "i_video.h"
 #include "m_controls.h"
+#include "mn_menu.h"
 #include "m_misc.h"
 #include "p_local.h"
 #include "r_local.h"
@@ -62,23 +63,6 @@ typedef enum
     ITT_NUMFUNC, // [crispy] numeric entry
     ITT_INERT
 } ItemType_t;
-
-typedef enum
-{
-    MENU_MAIN,
-    MENU_CLASS,
-    MENU_SKILL,
-    MENU_OPTIONS,
-    MENU_OPTIONS2,
-    MENU_FILES,
-    MENU_LOAD,
-    MENU_SAVE,
-    MENU_MOUSE,
-    MENU_CRISPNESS1,
-    MENU_CRISPNESS2,
-    MENU_CRISPNESS3,
-    MENU_NONE
-} MenuType_t;
 
 typedef struct
 {
@@ -119,7 +103,6 @@ extern void AM_initVariables(void); // [crispy]
 // PRIVATE FUNCTION PROTOTYPES ---------------------------------------------
 
 static void InitFonts(void);
-static void SetMenu(MenuType_t menu);
 static void SCQuitGame(int option);
 static void SCClass(int option);
 static void SCSkill(int option);
@@ -2975,7 +2958,7 @@ void MN_DrawInfo(void)
 //
 //---------------------------------------------------------------------------
 
-static void SetMenu(MenuType_t menu)
+void SetMenu(MenuType_t menu)
 {
     CurrentMenu->oldItPos = CurrentItPos;
     CurrentMenu = Menus[menu];

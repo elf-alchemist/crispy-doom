@@ -18,6 +18,9 @@
 #ifndef P_SPEC_H
 #define P_SPEC_H
 
+#include "doomtype.h"
+#include "h2def.h"
+#include "r_local.h"
 
 extern int *TerrainTypes;
 
@@ -582,5 +585,110 @@ boolean EV_ThingDeactivate(int tid);
 boolean EV_ThingRemove(int tid);
 boolean EV_ThingDestroy(int tid);
 
+// [crispy] identify action specials by name
+typedef enum action_t
+{
+    Polyobj_StartLine = 1,
+    Polyobj_RotateLeft,
+    Polyobj_RotateRight,
+    Polyobj_Move,
+    Polyobj_ExplicitLine,
+    Polyobj_MoveTimes8,
+    Polyobj_DoorSwing,
+    Polyobj_DoorSlide,
+
+    Door_Close = 10,
+    Door_Open,
+    Door_Raise,
+    Door_LockedRaise,
+
+    Floor_LowerByValue = 20,
+    Floor_LowerToLowest,
+    Floor_LowerToNearest,
+    Floor_RaiseByValue,
+    Floor_RaiseToHighest,
+    Floor_RaiseToNearest,
+    Stairs_BuildDown,
+    Stairs_BuildUp,
+    Floor_RaiseAndCrush,
+    Pillar_Build,
+    Pillar_Open,
+    Stairs_BuildDownSync,
+    Stairs_BuildUpSync,
+
+    Floor_RaiseByValueTimes8 = 35,
+    Floor_LowerByValueTimes8,
+
+    Ceiling_LowerByValue = 40,
+    Ceiling_RaiseByValue,
+    Ceiling_CrushAndRaise,
+    Ceiling_LowerAndCrush,
+    Ceiling_CrushStop,
+    Ceiling_CrushRaiseAndStay,
+    Floor_CrushStop,
+
+    Plat_PerpetualRaise = 60,
+    Plat_Stop,
+    Plat_DownWaitUpStay,
+    Plat_DownByValue,
+    Plat_UpWaitDownStay,
+    Plat_UpByValue,
+    Floor_LowerInstant,
+    Floor_RaiseInstant,
+    Floor_MoveToValueTimes8,
+    Ceiling_MoveToValueTimes8,
+    Teleport,
+    Teleport_NoFog,
+    ThrustThing,
+    DamageThing,
+    Teleport_NewMap,
+    Teleport_EndGame,
+
+    ACS_Execute = 80,
+    ACS_Suspend,
+    ACS_Terminate,
+    ACS_LockedExecute,
+
+    Polyobj_OR_RotateLeft = 90,
+    Polyobj_OR_RotateRight,
+    Polyobj_OR_Move,
+    Polyobj_OR_MoveTimes8,
+    Pillar_BuildAndCrush,
+    FloorAndCeiling_LowerByValue,
+    FloorAndCeiling_RaiseByValue,
+
+    Scroll_Texture_Left = 100,
+    Scroll_Texture_Model,
+    Scroll_Texture_Right,
+    Scroll_Texture_Up,
+
+    Light_ForceLightning = 109,
+    Light_RaiseByValue,
+    Light_LowerByValue,
+    Light_ChangeToValue,
+    Light_Fade,
+    Light_Glow,
+    Light_Flicker,
+    Light_Strobe,
+
+    Radius_Quake = 120,
+    Line_SetIdentification,
+    Line_BlockNetworkVisportal, // H+H, unused
+    ChangePlayerClass,          // H+H
+    ChangePlayerClassMenu,      // H+H
+
+    UsePuzzleItem = 129,
+    Thing_Activate,
+    Thing_Deactivate,
+    Thing_Remove,
+    Thing_Destroy,
+    Thing_Projectile,
+    Thing_Spawn,
+    Thing_ProjectileGravity,
+    Thing_SpawnNoFog,
+    Floor_Waggle,
+
+    Sector_ChangeSound = 140,
+} action_t;
 
 #endif // P_SPEC_H

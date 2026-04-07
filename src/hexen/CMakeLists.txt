@@ -12,7 +12,7 @@ add_library(hexen STATIC
             info.c              info.h
             in_lude.c
             m_random.c          m_random.h
-            mn_menu.c
+            mn_menu.c           mn_menu.h
             p_acs.c
                                 p_action.h
             p_anim.c

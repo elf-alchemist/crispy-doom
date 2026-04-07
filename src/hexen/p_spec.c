@@ -19,6 +19,7 @@
 
 #include "h2def.h"
 #include "i_system.h"
+#include "mn_menu.h"
 #include "m_misc.h"
 #include "p_local.h"
 #include "s_sound.h"
@@ -510,32 +511,32 @@ boolean P_ExecuteLineSpecial(int special, byte * args, line_t * line,
     buttonSuccess = false;
     switch (special)
     {
-        case 1:                // Poly Start Line
+        case Polyobj_StartLine:
             break;
-        case 2:                // Poly Rotate Left
+        case Polyobj_RotateLeft:
             buttonSuccess = EV_RotatePoly(line, args, 1, false);
             break;
-        case 3:                // Poly Rotate Right
+        case Polyobj_RotateRight:
             buttonSuccess = EV_RotatePoly(line, args, -1, false);
             break;
-        case 4:                // Poly Move
+        case Polyobj_Move:
             buttonSuccess = EV_MovePoly(line, args, false, false);
             break;
-        case 5:                // Poly Explicit Line:  Only used in initialization
+        case Polyobj_ExplicitLine:
             break;
-        case 6:                // Poly Move Times 8
+        case Polyobj_MoveTimes8:
             buttonSuccess = EV_MovePoly(line, args, true, false);
             break;
-        case 7:                // Poly Door Swing
+        case Polyobj_DoorSwing:
             buttonSuccess = EV_OpenPolyDoor(line, args, PODOOR_SWING);
             break;
-        case 8:                // Poly Door Slide
+        case Polyobj_DoorSlide:
             buttonSuccess = EV_OpenPolyDoor(line, args, PODOOR_SLIDE);
             break;
-        case 10:               // Door Close
+        case Door_Close:
             buttonSuccess = EV_DoDoor(line, args, DREV_CLOSE);
             break;
-        case 11:               // Door Open
+        case Door_Open:
             if (!args[0])
             {
                 buttonSuccess = EV_VerticalDoor(line, mo);
@@ -545,7 +546,7 @@ boolean P_ExecuteLineSpecial(int special, byte * args, line_t * line,
                 buttonSuccess = EV_DoDoor(line, args, DREV_OPEN);
             }
             break;
-        case 12:               // Door Raise
+        case Door_Raise:
             if (!args[0])
             {
                 buttonSuccess = EV_VerticalDoor(line, mo);
@@ -555,7 +556,7 @@ boolean P_ExecuteLineSpecial(int special, byte * args, line_t * line,
                 buttonSuccess = EV_DoDoor(line, args, DREV_NORMAL);
             }
             break;
-        case 13:               // Door Locked_Raise
+        case Door_LockedRaise:
             if (CheckedLockedDoor(mo, args[3]))
             {
                 if (!args[0])
@@ -568,117 +569,117 @@ boolean P_ExecuteLineSpecial(int special, byte * args, line_t * line,
                 }
             }
             break;
-        case 20:               // Floor Lower by Value
+        case Floor_LowerByValue:
             buttonSuccess = EV_DoFloor(line, args, FLEV_LOWERFLOORBYVALUE);
             break;
-        case 21:               // Floor Lower to Lowest
+        case Floor_LowerToLowest:
             buttonSuccess = EV_DoFloor(line, args, FLEV_LOWERFLOORTOLOWEST);
             break;
-        case 22:               // Floor Lower to Nearest
+        case Floor_LowerToNearest:
             buttonSuccess = EV_DoFloor(line, args, FLEV_LOWERFLOOR);
             break;
-        case 23:               // Floor Raise by Value
+        case Floor_RaiseByValue:
             buttonSuccess = EV_DoFloor(line, args, FLEV_RAISEFLOORBYVALUE);
             break;
-        case 24:               // Floor Raise to Highest
+        case Floor_RaiseToHighest:
             buttonSuccess = EV_DoFloor(line, args, FLEV_RAISEFLOOR);
             break;
-        case 25:               // Floor Raise to Nearest
+        case Floor_RaiseToNearest:
             buttonSuccess = EV_DoFloor(line, args, FLEV_RAISEFLOORTONEAREST);
             break;
-        case 26:               // Stairs Build Down Normal
+        case Stairs_BuildDown:
             buttonSuccess = EV_BuildStairs(line, args, -1, STAIRS_NORMAL);
             break;
-        case 27:               // Build Stairs Up Normal
+        case Stairs_BuildUp:
             buttonSuccess = EV_BuildStairs(line, args, 1, STAIRS_NORMAL);
             break;
-        case 28:               // Floor Raise and Crush
+        case Floor_RaiseAndCrush:
             buttonSuccess = EV_DoFloor(line, args, FLEV_RAISEFLOORCRUSH);
             break;
-        case 29:               // Build Pillar (no crushing)
+        case Pillar_Build:
             buttonSuccess = EV_BuildPillar(line, args, false);
             break;
-        case 30:               // Open Pillar
+        case Pillar_Open:
             buttonSuccess = EV_OpenPillar(line, args);
             break;
-        case 31:               // Stairs Build Down Sync
+        case Stairs_BuildDownSync:
             buttonSuccess = EV_BuildStairs(line, args, -1, STAIRS_SYNC);
             break;
-        case 32:               // Build Stairs Up Sync
+        case Stairs_BuildUpSync:
             buttonSuccess = EV_BuildStairs(line, args, 1, STAIRS_SYNC);
             break;
-        case 35:               // Raise Floor by Value Times 8
+        case Floor_RaiseByValueTimes8:
             buttonSuccess = EV_DoFloor(line, args, FLEV_RAISEBYVALUETIMES8);
             break;
-        case 36:               // Lower Floor by Value Times 8
+        case Floor_LowerByValueTimes8:
             buttonSuccess = EV_DoFloor(line, args, FLEV_LOWERBYVALUETIMES8);
             break;
-        case 40:               // Ceiling Lower by Value
+        case Ceiling_LowerByValue:
             buttonSuccess = EV_DoCeiling(line, args, CLEV_LOWERBYVALUE);
             break;
-        case 41:               // Ceiling Raise by Value
+        case Ceiling_RaiseByValue:
             buttonSuccess = EV_DoCeiling(line, args, CLEV_RAISEBYVALUE);
             break;
-        case 42:               // Ceiling Crush and Raise
+        case Ceiling_CrushAndRaise:
             buttonSuccess = EV_DoCeiling(line, args, CLEV_CRUSHANDRAISE);
             break;
-        case 43:               // Ceiling Lower and Crush
+        case Ceiling_LowerAndCrush:
             buttonSuccess = EV_DoCeiling(line, args, CLEV_LOWERANDCRUSH);
             break;
-        case 44:               // Ceiling Crush Stop
+        case Ceiling_CrushStop:
             buttonSuccess = EV_CeilingCrushStop(line, args);
             break;
-        case 45:               // Ceiling Crush Raise and Stay
+        case Ceiling_CrushRaiseAndStay:
             buttonSuccess = EV_DoCeiling(line, args, CLEV_CRUSHRAISEANDSTAY);
             break;
-        case 46:               // Floor Crush Stop
+        case Floor_CrushStop:
             buttonSuccess = EV_FloorCrushStop(line, args);
             break;
-        case 60:               // Plat Perpetual Raise
+        case Plat_PerpetualRaise:
             buttonSuccess = EV_DoPlat(line, args, PLAT_PERPETUALRAISE, 0);
             break;
-        case 61:               // Plat Stop
+        case Plat_Stop:
             EV_StopPlat(line, args);
             break;
-        case 62:               // Plat Down-Wait-Up-Stay
+        case Plat_DownWaitUpStay:
             buttonSuccess = EV_DoPlat(line, args, PLAT_DOWNWAITUPSTAY, 0);
             break;
-        case 63:               // Plat Down-by-Value*8-Wait-Up-Stay
+        case Plat_DownByValue:
             buttonSuccess = EV_DoPlat(line, args, PLAT_DOWNBYVALUEWAITUPSTAY,
                                       0);
             break;
-        case 64:               // Plat Up-Wait-Down-Stay
+        case Plat_UpWaitDownStay:
             buttonSuccess = EV_DoPlat(line, args, PLAT_UPWAITDOWNSTAY, 0);
             break;
-        case 65:               // Plat Up-by-Value*8-Wait-Down-Stay
+        case Plat_UpByValue:
             buttonSuccess = EV_DoPlat(line, args, PLAT_UPBYVALUEWAITDOWNSTAY,
                                       0);
             break;
-        case 66:               // Floor Lower Instant * 8
+        case Floor_LowerInstant:
             buttonSuccess = EV_DoFloor(line, args, FLEV_LOWERTIMES8INSTANT);
             break;
-        case 67:               // Floor Raise Instant * 8
+        case Floor_RaiseInstant:
             buttonSuccess = EV_DoFloor(line, args, FLEV_RAISETIMES8INSTANT);
             break;
-        case 68:               // Floor Move to Value * 8
+        case Floor_MoveToValueTimes8:
             buttonSuccess = EV_DoFloor(line, args, FLEV_MOVETOVALUETIMES8);
             break;
-        case 69:               // Ceiling Move to Value * 8
+        case Ceiling_MoveToValueTimes8:
             buttonSuccess = EV_DoCeiling(line, args, CLEV_MOVETOVALUETIMES8);
             break;
-        case 70:               // Teleport
+        case Teleport:
             if (side == 0)
             {                   // Only teleport when crossing the front side of a line
                 buttonSuccess = EV_Teleport(args[0], mo, true);
             }
             break;
-        case 71:               // Teleport, no fog
+        case Teleport_NoFog:
             if (side == 0)
             {                   // Only teleport when crossing the front side of a line
                 buttonSuccess = EV_Teleport(args[0], mo, false);
             }
             break;
-        case 72:               // Thrust Mobj
+        case ThrustThing:
             if (!side)          // Only thrust on side 0
             {
                 P_ThrustMobj(mo, args[0] * (ANG90 / 64),
@@ -686,7 +687,7 @@ boolean P_ExecuteLineSpecial(int special, byte * args, line_t * line,
                 buttonSuccess = 1;
             }
             break;
-        case 73:               // Damage Mobj
+        case DamageThing:
             if (args[0])
             {
                 P_DamageMobj(mo, NULL, NULL, args[0]);
@@ -697,7 +698,7 @@ boolean P_ExecuteLineSpecial(int special, byte * args, line_t * line,
             }
             buttonSuccess = 1;
             break;
-        case 74:               // Teleport_NewMap
+        case Teleport_NewMap:
             if (side == 0)
             {                   // Only teleport when crossing the front side of a line
                 if (!(mo && mo->player && mo->player->playerstate == PST_DEAD)) // Players must be alive to teleport
@@ -707,7 +708,7 @@ boolean P_ExecuteLineSpecial(int special, byte * args, line_t * line,
                 }
             }
             break;
-        case 75:               // Teleport_EndGame
+        case Teleport_EndGame:
             if (side == 0)
             {                   // Only teleport when crossing the front side of a line
                 if (!(mo && mo->player && mo->player->playerstate == PST_DEAD)) // Players must be alive to teleport
@@ -724,100 +725,126 @@ boolean P_ExecuteLineSpecial(int special, byte * args, line_t * line,
                 }
             }
             break;
-        case 80:               // ACS_Execute
+        case ACS_Execute:
             buttonSuccess =
                 P_StartACS(args[0], args[1], &args[2], mo, line, side);
             break;
-        case 81:               // ACS_Suspend
+        case ACS_Suspend:
             buttonSuccess = P_SuspendACS(args[0], args[1]);
             break;
-        case 82:               // ACS_Terminate
+        case ACS_Terminate:
             buttonSuccess = P_TerminateACS(args[0], args[1]);
             break;
-        case 83:               // ACS_LockedExecute
+        case ACS_LockedExecute:
             buttonSuccess = P_StartLockedACS(line, args, mo, side);
             break;
-        case 90:               // Poly Rotate Left Override
+        case Polyobj_OR_RotateLeft:
             buttonSuccess = EV_RotatePoly(line, args, 1, true);
             break;
-        case 91:               // Poly Rotate Right Override
+        case Polyobj_OR_RotateRight:
             buttonSuccess = EV_RotatePoly(line, args, -1, true);
             break;
-        case 92:               // Poly Move Override
+        case Polyobj_OR_Move:
             buttonSuccess = EV_MovePoly(line, args, false, true);
             break;
-        case 93:               // Poly Move Times 8 Override
+        case Polyobj_OR_MoveTimes8:
             buttonSuccess = EV_MovePoly(line, args, true, true);
             break;
-        case 94:               // Build Pillar Crush 
+        case Pillar_BuildAndCrush:
             buttonSuccess = EV_BuildPillar(line, args, true);
             break;
-        case 95:               // Lower Floor and Ceiling
+        case FloorAndCeiling_LowerByValue:
             buttonSuccess = EV_DoFloorAndCeiling(line, args, false);
             break;
-        case 96:               // Raise Floor and Ceiling
+        case FloorAndCeiling_RaiseByValue:
             buttonSuccess = EV_DoFloorAndCeiling(line, args, true);
             break;
-        case 109:              // Force Lightning
+        case Scroll_Texture_Left:
+            // no-op
+            break;
+        case Scroll_Texture_Right:
+            // no-op
+            break;
+        case Scroll_Texture_Up:
+            // no-op
+            break;
+        case Scroll_Texture_Model:
+            // no-op
+            break;
+        case Light_ForceLightning:
             buttonSuccess = true;
             P_ForceLightning();
             break;
-        case 110:              // Light Raise by Value
+        case Light_RaiseByValue:
             buttonSuccess = EV_SpawnLight(line, args, LITE_RAISEBYVALUE);
             break;
-        case 111:              // Light Lower by Value
+        case Light_LowerByValue:
             buttonSuccess = EV_SpawnLight(line, args, LITE_LOWERBYVALUE);
             break;
-        case 112:              // Light Change to Value
+        case Light_ChangeToValue:
             buttonSuccess = EV_SpawnLight(line, args, LITE_CHANGETOVALUE);
             break;
-        case 113:              // Light Fade
+        case Light_Fade:
             buttonSuccess = EV_SpawnLight(line, args, LITE_FADE);
             break;
-        case 114:              // Light Glow
+        case Light_Glow:
             buttonSuccess = EV_SpawnLight(line, args, LITE_GLOW);
             break;
-        case 115:              // Light Flicker
+        case Light_Flicker:
             buttonSuccess = EV_SpawnLight(line, args, LITE_FLICKER);
             break;
-        case 116:              // Light Strobe
+        case Light_Strobe:
             buttonSuccess = EV_SpawnLight(line, args, LITE_STROBE);
             break;
-        case 120:              // Quake Tremor
+        case Radius_Quake:
             buttonSuccess = A_LocalQuake(args, mo);
             break;
-        case 129:              // UsePuzzleItem
+        case Line_SetIdentification:
+            // no-op
+            break;
+        case Line_BlockNetworkVisportal:
+            // no-op
+            break;
+        case ChangePlayerClass:
+            PlayerClass[consoleplayer] = args[0];
+            buttonSuccess = true;
+            break;
+        case ChangePlayerClassMenu:
+            SetMenu(MENU_CLASS);
+            buttonSuccess = true;
+            break;
+        case UsePuzzleItem:
             buttonSuccess = EV_LineSearchForPuzzleItem(line, args, mo);
             break;
-        case 130:              // Thing_Activate
+        case Thing_Activate:
             buttonSuccess = EV_ThingActivate(args[0]);
             break;
-        case 131:              // Thing_Deactivate
+        case Thing_Deactivate:
             buttonSuccess = EV_ThingDeactivate(args[0]);
             break;
-        case 132:              // Thing_Remove
+        case Thing_Remove:
             buttonSuccess = EV_ThingRemove(args[0]);
             break;
-        case 133:              // Thing_Destroy
+        case Thing_Destroy:
             buttonSuccess = EV_ThingDestroy(args[0]);
             break;
-        case 134:              // Thing_Projectile
+        case Thing_Projectile:
             buttonSuccess = EV_ThingProjectile(args, 0);
             break;
-        case 135:              // Thing_Spawn
+        case Thing_Spawn:
             buttonSuccess = EV_ThingSpawn(args, 1);
             break;
-        case 136:              // Thing_ProjectileGravity
+        case Thing_ProjectileGravity:
             buttonSuccess = EV_ThingProjectile(args, 1);
             break;
-        case 137:              // Thing_SpawnNoFog
+        case Thing_SpawnNoFog:
             buttonSuccess = EV_ThingSpawn(args, 0);
             break;
-        case 138:              // Floor_Waggle
+        case Floor_Waggle:
             buttonSuccess = EV_StartFloorWaggle(args[0], args[1],
                                                 args[2], args[3], args[4]);
             break;
-        case 140:              // Sector_SoundChange
+        case Sector_ChangeSound:
             buttonSuccess = EV_SectorSoundChange(args);
             break;
 
