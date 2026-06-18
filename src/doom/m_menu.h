@@ -64,4 +64,12 @@ extern int showMessages;
 extern boolean numeric_enter;
 extern int numeric_entry;
 
+// [crispy] UMAPINFO support
+#define MAX_EPISODES 10
+
+#define M_Y_EPISODES 63
+
+#define EPISODES_RECT(n) \
+    {0, M_Y_EPISODES + (n) * LINEHEIGHT, SCREENWIDTH, LINEHEIGHT}
+
 #endif

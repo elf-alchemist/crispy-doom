@@ -40,7 +40,6 @@
 #include "m_controls.h" // [crispy] key_*
 #include "m_misc.h" // [crispy] M_StringDuplicate()
 #include "m_random.h" // [crispy] Crispy_Random()
-#include "d_pwad.h" // [crispy] kex secret level
 
 typedef enum
 {
@@ -99,10 +98,6 @@ static textscreen_t textscreens[] =
     { pack_plut, 1, 30, "RROCK17",   P4TEXT},
     { pack_plut, 1, 15, "RROCK13",   P5TEXT},
     { pack_plut, 1, 31, "RROCK19",   P6TEXT},
-
-    { pack_nerve, 1, 8, "SLIME16",   N1TEXT},
-    { pack_master, 1, 20, "SLIME16",   M1TEXT},
-    { pack_master, 1, 21, "SLIME16",   M2TEXT},
 };
 
 const char *finaletext;
@@ -159,12 +154,6 @@ void F_StartFinale (void)
         }
     }
 
-    // Hack for kex masterlevels finale text
-    if (logical_gamemission == pack_master && D_CheckMasterlevelKex() && players[consoleplayer].didsecret)
-    {
-        finaletext = M2TEXT;
-    }
-
     // Do dehacked substitutions of strings
   
     finaletext = DEH_String(finaletext);
@@ -211,13 +200,6 @@ void F_Ticker (void)
 				
       if (i < MAXPLAYERS)
       {	
-	if (gamemission == pack_nerve && gamemap == 8)
-	  F_StartCast ();
-	else
-    // [crispy] kex lvl 20 (checked in G_WorldDone), psn/unity lvl 20 or 21
-	if (gamemission == pack_master && (gamemap == 20 || gamemap == 21))
-	  F_StartCast ();
-	else
 	if (gamemap == 30)
 	  F_StartCast ();
 	else
@@ -1019,27 +1001,6 @@ static void F_ArtScreenDrawer(void)
                 break;
             case 4:
                 lumpname = "ENDPIC";
-                break;
-            // [crispy] Sigil
-            case 5:
-                lumpname = "SIGILEND";
-                if (W_CheckNumForName(DEH_String(lumpname)) == -1)
-                {
-                    return;
-                }
-                break;
-            // [crispy] Sigil II
-            case 6:
-                lumpname = "SGL2END";
-                if (W_CheckNumForName(DEH_String(lumpname)) == -1)
-                {
-                    lumpname = "SIGILEND";
-
-                    if (W_CheckNumForName(DEH_String(lumpname)) == -1)
-                    {
-                        return;
-                    }
-                }
                 break;
             default:
                 return;

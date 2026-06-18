@@ -47,7 +47,6 @@
 #include "st_stuff.h" // [crispy] ST_DrawDemoTimer()
 #include "wi_stuff.h"
 
-#include "d_pwad.h" // [crispy] kex secret level
 
 //
 // Data needed to add patches to full screen intermission pics.
@@ -878,11 +877,6 @@ void WI_drawShowNextLoc(void)
 	    WI_drawOnLnode(wbs->next, yah); 
     }
 
-    if ((gamemission == pack_nerve && wbs->last == 7) ||
-        (gamemission == pack_master && wbs->last == 19 && !secretexit) ||
-        (gamemission == pack_master && !D_CheckMasterlevelKex() && wbs->last == 20))
-        return;
-
     // draws which level you are entering..
     if ( (gamemode != commercial)
 	 || wbs->next != 30)
@@ -1526,12 +1520,6 @@ static boolean WI_drawParTime (void)
 			result = false;
 		}
 
-		// [crispy] PWAD: NRFTL has par times
-		if (gamemission == pack_nerve)
-		{
-			result = true;
-		}
-
 		// [crispy] IWAD/PWAD: BEX patch provided par times
 		if (bex_cpars[wbs->last])
 		{
@@ -1679,12 +1667,6 @@ void WI_Ticker(void)
 	// intermission music
   	if ( gamemode == commercial )
 	  S_ChangeMusic(mus_dm2int, true);
-	// [crispy] Sigil
-	else if (crispy->haved1e5 && wbs->epsd == 4 && W_CheckNumForName(DEH_String("D_SIGINT")) != -1)
-	  S_ChangeMusic(mus_sigint, true);
-	// [crispy] Sigil II
-	else if (crispy->haved1e6 && wbs->epsd == 5 && W_CheckNumForName(DEH_String("D_SG2INT")) != -1)
-	  S_ChangeMusic(mus_sg2int, true);
 	else
 	  S_ChangeMusic(mus_inter, true); 
     }
@@ -1726,15 +1708,6 @@ static void WI_loadUnloadData(load_callback_t callback)
 	for (i=0 ; i<NUMCMAPS ; i++)
 	{
 	    DEH_snprintf(name, 9, "CWILV%2.2d", i);
-	    // [crispy] NRFTL / The Master Levels
-	    if (crispy->havenerve && wbs->epsd == 1 && i < 9) // [crispy] gamemission == pack_nerve
-	    {
-		name[0] = 'N';
-	    }
-	    if (crispy->havemaster && crispy->havemaster != (char *)-1 && wbs->epsd == 2 && i < 21) // [crispy] gamemission == pack_master
-	    {
-		name[0] = 'M';
-	    }
             callback(name, &lnames[i]);
 	}
     }
@@ -1867,30 +1840,11 @@ static void WI_loadUnloadData(load_callback_t callback)
 
     if (gamemode == commercial)
     {
-        if (crispy->havenerve && wbs->epsd == 1 && W_CheckNumForName(DEH_String("NERVEINT")) != -1) // [crispy] gamemission == pack_nerve
-        {
-            M_StringCopy(name, DEH_String("NERVEINT"), sizeof(name));
-        }
-        else if (crispy->havemaster && wbs->epsd == 2 && W_CheckNumForName(DEH_String("MASTRINT")) != -1) // [crispy] gamemission == pack_master
-        {
-            M_StringCopy(name, DEH_String("MASTRINT"), sizeof(name));
-        }
-        else
-        {
         M_StringCopy(name, DEH_String("INTERPIC"), sizeof(name));
-        }
     }
     else if (gameversion >= exe_ultimate && wbs->epsd == 3)
     {
         M_StringCopy(name, DEH_String("INTERPIC"), sizeof(name));
-    }
-    else if (crispy->haved1e5 && wbs->epsd == 4 && W_CheckNumForName(DEH_String("SIGILINT")) != -1) // [crispy] Sigil
-    {
-        M_StringCopy(name, DEH_String("SIGILINT"), sizeof(name));
-    }
-    else if (crispy->haved1e6 && wbs->epsd == 5 && W_CheckNumForName(DEH_String("SIGILIN2")) != -1) // [crispy] Sigil
-    {
-        M_StringCopy(name, DEH_String("SIGILIN2"), sizeof(name));
     }
     else
     {

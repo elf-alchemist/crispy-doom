@@ -31,7 +31,9 @@ crispy.c             crispy.h              \
 i_main.c                                   \
 i_system.c           i_system.h            \
 m_argv.c             m_argv.h              \
-m_misc.c             m_misc.h
+m_array.c            m_array.h             \
+m_misc.c             m_misc.h              \
+m_scanner.c          m_scanner.h
 
 # Dedicated server (chocolate-server):
 

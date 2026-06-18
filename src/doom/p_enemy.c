@@ -26,7 +26,6 @@
 
 #include "doomdef.h"
 #include "p_local.h"
-#include "d_pwad.h" // [crispy] kex masterlevels
 
 #include "s_sound.h"
 
@@ -1734,36 +1733,6 @@ static boolean CheckBossEnd(mobjtype_t motype)
     }
 }
 
-// [crispy] check if the there is a Doom 2 / Masterlevel tag 666 present in map
-boolean P_CheckMapTag666 (void)
-{
-    if (gamemode == commercial)
-    {
-        if (gamemission == pack_master)
-        {
-            if (D_CheckMasterlevelKex())
-            {
-                // kex materlevels.wad
-                return (gamemap == 13 || gamemap == 19 || gamemap == 20);
-            }
-            else
-            {
-                // psn/unity masterlevels.wad
-                return (gamemap == 14 || gamemap == 15 || gamemap == 16);
-            }
-        }
-        else
-        {
-            // other Doom2-based gamemissions
-            return (gamemap == 7);
-        }        
-    }
-    else
-    {
-        return false;
-    }
-}
-
 //
 // A_BossDeath
 // Possibly trigger special effects
@@ -1778,7 +1747,7 @@ void A_BossDeath (mobj_t* mo)
 		
     if ( gamemode == commercial)
     {
-	if (!P_CheckMapTag666())
+	if (gamemap != 7)
 	    return;
 		
 	if ((mo->type != MT_FATSO)
@@ -1821,7 +1790,7 @@ void A_BossDeath (mobj_t* mo)
     // victory!
     if ( gamemode == commercial)
     {
-	if (P_CheckMapTag666())
+	if (gamemap == 7)
 	{
 	    if (mo->type == MT_FATSO)
 	    {

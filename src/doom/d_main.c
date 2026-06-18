@@ -35,7 +35,6 @@
 #include "sounds.h"
 
 #include "d_iwad.h"
-#include "d_pwad.h" // [crispy] D_Load{Sigil,Nerve,Masterlevels}Wad()
 
 #include "z_zone.h"
 #include "w_main.h"
@@ -1042,14 +1041,6 @@ static void D_SetGameDescription(void)
         else if (logical_gamemission == pack_tnt)
         {
             gamedescription = GetGameName("DOOM 2: TNT - Evilution");
-        }
-        else if (logical_gamemission == pack_nerve)
-        {
-            gamedescription = GetGameName("DOOM 2: No Rest For The Living");
-        }
-        else if (logical_gamemission == pack_master)
-        {
-            gamedescription = GetGameName("Master Levels for DOOM 2");
         }
     }
 

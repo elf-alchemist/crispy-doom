@@ -23,6 +23,7 @@
 #include <time.h> // [crispy] strftime, localtime
 
 
+#include "g_umapinfo.h"
 #include "doomdef.h"
 #include "doomkeys.h"
 #include "dstrings.h"
@@ -66,7 +67,6 @@
 
 #include "v_trans.h" // [crispy] colored "invert mouse" message
 
-#include "d_pwad.h" // [crispy] kex secret level
 
 //
 // defaulted values
@@ -330,18 +330,6 @@ menuitem_t EpisodeMenu[]=
     {1,"M_EPI2", M_Episode,'t'},
     {1,"M_EPI3", M_Episode,'i'},
     {1,"M_EPI4", M_Episode,'t'}
-   ,{1,"M_EPI5", M_Episode,'s'} // [crispy] Sigil
-   ,{1,"M_EPI6", M_Episode,'s'} // [crispy] Sigil II
-};
-
-// [crispy] have Sigil II but not Sigil
-menuitem_t EpisodeMenuSII[]=
-{
-    {1,"M_EPI1", M_Episode,'k'},
-    {1,"M_EPI2", M_Episode,'t'},
-    {1,"M_EPI3", M_Episode,'i'},
-    {1,"M_EPI4", M_Episode,'t'}
-   ,{1,"M_EPI6", M_Episode,'s'} // [crispy] Sigil II
 };
 
 menu_t  EpiDef =
@@ -1392,6 +1380,62 @@ void M_Episode(int choice)
 }
 
 
+//
+// [cirpsy] UMAPINFO support
+//
+
+boolean EpiCustom;
+static short EpiMenuMap[MAX_EPISODES] = {1, 1, 1, 1, -1, -1, -1, -1, -1, -1};
+static short EpiMenuEpi[MAX_EPISODES] = {1, 2, 3, 4, -1, -1, -1, -1, -1, -1};
+
+void MN_ClearEpisodes(void)
+{
+    EpiDef.numitems = 0;
+    NewDef.prevMenu = &MainDef;
+}
+
+void MN_AddEpisode(const char *map, const char *gfx, const char *txt, char key)
+{
+    int epi, mapnum;
+
+    if (!EpiCustom)
+    {
+        EpiCustom = true;
+        NewDef.prevMenu = &EpiDef;
+
+        if (gamemode == commercial)
+        {
+            EpiDef.numitems = 0;
+        }
+    }
+
+    if (EpiDef.numitems == 8)
+    {
+        printf("MN_AddEpisode: UMAPINFO spec limit of 8 episodes exceeded!\n");
+    }
+    else if (EpiDef.numitems >= MAX_EPISODES)
+    {
+        return;
+    }
+
+    G_ValidateMapName(map, &epi, &mapnum);
+    EpiMenuEpi[EpiDef.numitems] = epi;
+    EpiMenuMap[EpiDef.numitems] = mapnum;
+    strncpy(EpisodeMenu[EpiDef.numitems].name, gfx, 8);
+    EpisodeMenu[EpiDef.numitems].name[9] = 0;
+    EpisodeMenu[EpiDef.numitems].alttext = txt ? strdup(txt) : NULL;
+    EpisodeMenu[EpiDef.numitems].alphaKey = key;
+    EpiDef.numitems++;
+
+    if (EpiDef.numitems <= 4)
+    {
+        EpiDef.y = 63;
+    }
+    else
+    {
+        EpiDef.y = MAX(25, 63 - (EpiDef.numitems - 4) * (LINEHEIGHT / 2));
+    }
+}
 
 //
 // M_Options
@@ -2225,21 +2269,6 @@ static int G_GotoNextLevel(void)
         doom2_next[30] = 16;
         doom2_next[20] = 1;
       }
-
-      if (gamemission == pack_master)
-      {
-        doom2_next[1] = 3;
-        doom2_next[14] = 16;
-        doom2_next[20] = 1;
-        if (D_CheckMasterlevelKex())
-        {
-            // [crispy] kex secret detour
-            doom2_next[17] = 21;
-            doom2_next[20] = 19;
-            doom2_next[18] = 20;
-            doom2_next[19] = 1;
-        }
-      }
     }
     else
     {
@@ -2248,14 +2277,6 @@ static int G_GotoNextLevel(void)
 
       if (gamemode == registered)
         doom_next[2][7] = 11;
-
-      // [crispy] Sigil and Sigil II
-      if (!crispy->haved1e5 && !crispy->haved1e6)
-        doom_next[3][7] = 11;
-      else if (!crispy->haved1e5 && crispy->haved1e6)
-        doom_next[3][7] = 61;
-      else if (crispy->haved1e5 && !crispy->haved1e6)
-        doom_next[4][7] = 11;
 
       if (gameversion == exe_chex)
       {
@@ -2271,10 +2292,7 @@ static int G_GotoNextLevel(void)
     if (gamemode == commercial)
     {
       epsd = gameepisode;
-      if (gamemission == pack_nerve)
-        map = nerve_next[gamemap-1];
-      else
-        map = doom2_next[gamemap-1];
+      map = doom2_next[gamemap-1];
     }
     else
     {
@@ -3364,20 +3382,6 @@ void M_Init (void)
         ReadMenu1[rdthsempty1].routine = M_FinishReadThis;
     }
 
-    // [crispy] Sigil
-    if (!crispy->haved1e5 && !crispy->haved1e6)
-    {
-        EpiDef.numitems = 4;
-    }
-    else if (crispy->haved1e5 != crispy->haved1e6)
-    {
-        EpiDef.numitems = 5;
-        if (crispy->haved1e6)
-        {
-            EpiDef.menuitems = EpisodeMenuSII;
-        }
-    }
-
     // Versions of doom.exe before the Ultimate Doom release only had
     // three episodes; if we're emulating one of those then don't try
     // to show episode four. If we are, then do show episode four
@@ -3392,75 +3396,6 @@ void M_Init (void)
         EpiDef.numitems = 1;
         // [crispy] never show the Episode menu
         NewDef.prevMenu = &MainDef;
-    }
-
-    // [crispy] NRFTL / The Master Levels
-    if (crispy->havenerve || crispy->havemaster)
-    {
-        int i, j;
-
-        NewDef.prevMenu = &EpiDef;
-        EpisodeMenu[0].alphaKey = gamevariant == freedm ||
-                                  gamevariant == freedoom ?
-                                 'f' :
-                                 'h';
-        EpisodeMenu[0].alttext = gamevariant == freedm ?
-                                 "FreeDM" :
-                                 gamevariant == freedoom ?
-                                 "Freedoom: Phase 2" :
-                                 "Hell on Earth";
-        EpiDef.numitems = 1;
-
-        if (crispy->havenerve)
-        {
-            EpisodeMenu[EpiDef.numitems].alphaKey = 'n';
-            EpisodeMenu[EpiDef.numitems].alttext = "No Rest for the Living";
-            EpiDef.numitems++;
-
-            i = W_CheckNumForName("M_EPI1");
-            j = W_CheckNumForName("M_EPI2");
-
-            // [crispy] render the episode menu with the HUD font ...
-            // ... if the graphics are not available
-            if (i != -1 && j != -1)
-            {
-                // ... or if the graphics are both from an IWAD
-                if (W_IsIWADLump(lumpinfo[i]) && W_IsIWADLump(lumpinfo[j]))
-                {
-                    const patch_t *pi, *pj;
-
-                    pi = W_CacheLumpNum(i, PU_CACHE);
-                    pj = W_CacheLumpNum(j, PU_CACHE);
-
-                    // ... and if the patch width for "Hell on Earth"
-                    //     is longer than "No Rest for the Living"
-                    if (SHORT(pi->width) > SHORT(pj->width))
-                    {
-                        EpiDef.lumps_missing = 1;
-                    }
-                }
-            }
-            else
-            {
-                EpiDef.lumps_missing = 1;
-            }
-        }
-
-        if (crispy->havemaster)
-        {
-            EpisodeMenu[EpiDef.numitems].alphaKey = 't';
-            EpisodeMenu[EpiDef.numitems].alttext = "The Master Levels";
-            EpiDef.numitems++;
-
-            i = W_CheckNumForName(EpiDef.numitems == 3 ? "M_EPI3" : "M_EPI2");
-
-            // [crispy] render the episode menu with the HUD font
-            // if the graphics are not available or not from a PWAD
-            if (i == -1 || W_IsIWADLump(lumpinfo[i]))
-            {
-                EpiDef.lumps_missing = 1;
-            }
-        }
     }
 
     // [crispy] rearrange Load Game and Save Game menus

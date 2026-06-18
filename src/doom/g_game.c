@@ -81,7 +81,6 @@
 #include "deh_main.h" // [crispy] for demo footer
 #include "memio.h"
 
-#include "d_pwad.h" // [crispy] kex secret level
 
 #define SAVEGAMESIZE	0x2c000
 
@@ -989,36 +988,6 @@ void G_DoLoadLevel (void)
 { 
     int             i; 
 
-    // [crispy] NRFTL / The Master Levels
-    if (crispy->havenerve || crispy->havemaster)
-    {
-        if (crispy->havemaster && gameepisode == 3)
-        {
-            gamemission = pack_master;
-        }
-        else
-        if (crispy->havenerve && gameepisode == 2)
-        {
-            gamemission = pack_nerve;
-        }
-        else
-        {
-            gamemission = doom2;
-        }
-    }
-    else
-    {
-        if (gamemission == pack_master)
-        {
-            gameepisode = 3;
-        }
-        else
-        if (gamemission == pack_nerve)
-        {
-            gameepisode = 2;
-        }
-    }
-
     // Set the sky map.
     // First thing, we have a dummy sky texture name,
     //  a flat. The data is in the WAD only because
@@ -1035,54 +1004,13 @@ void G_DoLoadLevel (void)
     {
         const char *skytexturename;
 
-        // nerve skies
-        if (gamemap < 12 && (gameepisode == 2 || gamemission == pack_nerve))
-        {
-            if (gamemap >= 4 && gamemap <= 8)
-                skytexturename = "SKY3";
-            else
-                skytexturename = "SKY1";
-        }
-        // masterlevel skies
-        else if (gamemap < 21 && (gameepisode == 3 || gamemission == pack_master))
-        {
-            if (D_CheckMasterlevelKex())
-            {
-                // masterlevels kex skies
-                if (gamemap == 10)
-                    skytexturename = "SKY3";
-                else
-                if (gamemap <= 9)
-                    skytexturename = "SKYM1";
-                else
-                if (gamemap >= 16)
-                    skytexturename = "SKYM3";
-                else
-                    skytexturename = "SKYM2";
-            }
-            else
-            {
-                // masterlevels psn/unity skies
-                if (gamemap < 12 || gamemap == 14 || gamemap == 15)
-                    skytexturename = "SKY1";
-                else
-                if (gamemap >= 19)
-                    skytexturename = "SKY3";
-                else
-                    skytexturename = "SKY2";
-            }
-        }
         // doom2 skies
+        if (gamemap < 12)
+            skytexturename = "SKY1";
+        else if (gamemap < 21)
+            skytexturename = "SKY2";
         else
-        {
-            if (gamemap < 12)
-                skytexturename = "SKY1";
-            else
-            if (gamemap < 21)
-                skytexturename = "SKY2";
-            else
-                skytexturename = "SKY3";
-        }
+            skytexturename = "SKY3";
 
         skytexturename = DEH_String(skytexturename);
 
@@ -2196,36 +2124,6 @@ void G_DoCompleted (void)
     wminfo.last = gamemap -1;
     
     // wminfo.next is 0 biased, unlike gamemap
-    if ( gamemission == pack_nerve && gamemap <= 9 )
-    {
-	if (secretexit)
-	    switch(gamemap)
-	    {
-	      case  4: wminfo.next = 8; break;
-	    }
-	else
-	    switch(gamemap)
-	    {
-	      case  9: wminfo.next = 4; break;
-	      default: wminfo.next = gamemap;
-	    }
-    }
-    else
-    if ( gamemission == pack_master && gamemap <= 21 )
-    {
-        wminfo.next = gamemap;
-        // [crispy] kex masterlevel secret detour?
-        if (D_CheckMasterlevelKex())
-        {
-            // [crispy] bad dream secret exit in TEETH
-            if (gamemap == 18 && secretexit)
-                wminfo.next = 20;
-            // [crispy] bloodsea keep after bad dream secret
-            else if (gamemap == 21)
-                wminfo.next = 18;
-        }
-    }
-    else
     if ( gamemode == commercial)
     {
 	if (secretexit)
@@ -2270,7 +2168,6 @@ void G_DoCompleted (void)
 		wminfo.next = 5; 
 		break; 
 	      case 3: 
-	      case 5: // [crispy] Sigil
 		wminfo.next = 6; 
 		break; 
 	      case 4:
@@ -2309,11 +2206,6 @@ void G_DoCompleted (void)
         {
             wminfo.partime = TICRATE*bex_cpars[gamemap-1];
         }
-        // [crispy] par times for NRFTL
-        else if (gamemission == pack_nerve)
-        {
-            wminfo.partime = TICRATE*npars[gamemap-1];
-        }
         else
         {
             wminfo.partime = TICRATE*cpars[gamemap-1];
@@ -2323,11 +2215,7 @@ void G_DoCompleted (void)
     // overflows into the cpars array.
     else if (gameepisode < 4 ||
         // [crispy] single player par times for episode 4
-        (gameepisode == 4 && crispy->singleplayer) ||
-        // [crispy] par times for Sigil
-        gameepisode == 5 ||
-        // [crispy] par times for Sigil II
-        gameepisode == 6)
+        (gameepisode == 4 && crispy->singleplayer))
     {
         // [crispy] support [PARS] sections in BEX files
         if (bex_pars[gameepisode][gamemap])
@@ -2396,37 +2284,6 @@ void G_WorldDone (void)
       if (!crispy->havee1m10 || gameepisode != 1 || gamemap != 1)
 	players[consoleplayer].didsecret = true; 
 
-    if ( gamemission == pack_nerve )
-    {
-	switch (gamemap)
-	{
-	  case 8:
-	    F_StartFinale ();
-	    break;
-	}
-    }
-    else
-    if ( gamemission == pack_master )
-    {
-    if (D_CheckMasterlevelKex())
-    {
-        if (gamemap == 20)
-        F_StartFinale ();
-    }
-    else
-    {
-	switch (gamemap)
-	{
-	  case 20:
-	    if (secretexit)
-		break;
-	  case 21:
-	    F_StartFinale ();
-	    break;
-	}      
-    }
-    }
-    else
     if ( gamemode == commercial )
     {
 	switch (gamemap)
@@ -2940,20 +2797,6 @@ G_InitNew
             break;
           case 4:        // Special Edition sky
             skytexturename = "SKY4";
-            break;
-          case 5:        // [crispy] Sigil
-            skytexturename = "SKY5_ZD";
-            if (R_CheckTextureNumForName(DEH_String(skytexturename)) == -1)
-            {
-                skytexturename = "SKY3";
-            }
-            break;
-          case 6:        // [crispy] Sigil II
-            skytexturename = "SKY6_ZD";
-            if (R_CheckTextureNumForName(DEH_String(skytexturename)) == -1)
-            {
-                skytexturename = "SKY3";
-            }
             break;
         }
         skytexturename = DEH_String(skytexturename);

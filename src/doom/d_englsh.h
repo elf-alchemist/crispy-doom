@@ -197,26 +197,6 @@
 #define HUSTR_E4M8	"E4M8: Unto The Cruel"
 #define HUSTR_E4M9	"E4M9: Fear"
 
-#define HUSTR_E5M1	"E5M1: Baphomet's Demesne"
-#define HUSTR_E5M2	"E5M2: Sheol"
-#define HUSTR_E5M3	"E5M3: Cages of the Damned"
-#define HUSTR_E5M4	"E5M4: Paths of Wretchedness"
-#define HUSTR_E5M5	"E5M5: Abaddon's Void"
-#define HUSTR_E5M6	"E5M6: Unspeakable Persecution"
-#define HUSTR_E5M7	"E5M7: Nightmare Underworld"
-#define HUSTR_E5M8	"E5M8: Halls of Perdition"
-#define HUSTR_E5M9	"E5M9: Realm of Iblis"
-
-#define HUSTR_E6M1	"E6M1: Cursed Darkness"
-#define HUSTR_E6M2	"E6M2: Violent Hatred"
-#define HUSTR_E6M3	"E6M3: Twilight Desolation"
-#define HUSTR_E6M4	"E6M4: Fragments of Sanity"
-#define HUSTR_E6M5	"E6M5: Wrathful Reckoning"
-#define HUSTR_E6M6	"E6M6: Vengeance Unleashed"
-#define HUSTR_E6M7	"E6M7: Descent Into Terror"
-#define HUSTR_E6M8	"E6M8: Abyss of Despair"
-#define HUSTR_E6M9	"E6M9: Shattered Homecoming"
-
 #define HUSTR_1	"level 1: entryway"
 #define HUSTR_2	"level 2: underhalls"
 #define HUSTR_3	"level 3: the gantlet"
@@ -324,38 +304,6 @@
 
 #define THUSTR_31	"level 31: pharaoh"
 #define THUSTR_32	"level 32: caribbean"
-
-#define NHUSTR_1	"level 1: The Earth Base"
-#define NHUSTR_2	"level 2: The Pain Labs"
-#define NHUSTR_3	"level 3: Canyon of the Dead"
-#define NHUSTR_4	"level 4: Hell Mountain"
-#define NHUSTR_5	"level 5: Vivisection"
-#define NHUSTR_6	"level 6: Inferno of Blood"
-#define NHUSTR_7	"level 7: Baron's Banquet"
-#define NHUSTR_8	"level 8: Tomb of Malevolence"
-#define NHUSTR_9	"level 9: March of the Demons"
-
-#define MHUSTR_1	"level 1: Attack"
-#define MHUSTR_2	"level 2: Canyon"
-#define MHUSTR_3	"level 3: The Catwalk"
-#define MHUSTR_4	"level 4: The Combine"
-#define MHUSTR_5	"level 5: The Fistula"
-#define MHUSTR_6	"level 6: The Garrison"
-#define MHUSTR_7	"level 7: Titan Manor"
-#define MHUSTR_8	"level 8: Paradox"
-#define MHUSTR_9	"level 9: Subspace"
-#define MHUSTR_10	"level 10: Subterra"
-#define MHUSTR_11	"level 11: Trapped On Titan"
-#define MHUSTR_12	"level 12: Virgil's Lead"
-#define MHUSTR_13	"level 13: Minos' Judgement"
-#define MHUSTR_14	"level 14: Bloodsea Keep"
-#define MHUSTR_15	"level 15: Mephisto's Maosoleum"
-#define MHUSTR_16	"level 16: Nessus"
-#define MHUSTR_17	"level 17: Geryon"
-#define MHUSTR_18	"level 18: Vesperas"
-#define MHUSTR_19	"level 19: Black Tower"
-#define MHUSTR_20	"level 20: The Express Elevator To Hell"
-#define MHUSTR_21	"level 21: Bad Dream"
 
 #define HUSTR_CHATMACRO1	"I'm ready to kick butt!"
 #define HUSTR_CHATMACRO2	"I'm OK."
@@ -767,44 +715,6 @@
 "As you step off the transport, you hear\n"\
 "the stomp of a cyberdemon's iron shoe."
 
-
-#define N1TEXT \
-"TROUBLE WAS BREWING AGAIN IN YOUR FAVORITE\n"\
-"VACATION SPOT... HELL. SOME CYBERDEMON\n"\
-"PUNK THOUGHT HE COULD TURN HELL INTO A\n"\
-"PERSONAL AMUSEMENT PARK, AND MAKE EARTH\nTHE TICKET BOOTH.\n\n"\
-"WELL THAT HALF-ROBOT FREAK SHOW DIDN'T\n"\
-"KNOW WHO WAS COMING TO THE FAIR. THERE'S\n"\
-"NOTHING LIKE A SHOOTING GALLERY FULL OF\n"\
-"HELLSPAWN TO GET THE BLOOD PUMPING...\n\n"\
-"NOW THE WALLS OF THE DEMON'S LABYRINTH\n"\
-"ECHO WITH THE SOUND OF HIS METALLIC LIMBS\n"\
-"HITTING THE FLOOR. HIS DEATH MOAN GURGLES\n" \
-"OUT THROUGH THE MESS YOU LEFT OF HIS FACE.\n\n" \
-"THIS RIDE IS CLOSED."
-
-#define M1TEXT \
-"CONGRATULATIONS YOU HAVE FINISHED... \n\n"\
-"MOST OF THE MASTER LEVELS\n\n"\
-"You have ventured through the most\n"\
-"twisted levels that hell had to\n"\
-"offer and you have survived. \n\n"\
-"But alas the demons laugh at you\n"\
-"since you have shown cowardice and didn't\n"\
-"reach the most hideous level\n"\
-"they had made for you."
-
-#define M2TEXT \
-"CONGRATULATIONS YOU HAVE FINISHED... \n\n"\
-"ALL THE MASTER LEVELS\n\n"\
-"You have ventured through all the\n"\
-"twisted levels that hell had to\n"\
-"offer and you have survived. \n\n"\
-"The Flames of rage flow through\n"\
-"your veins, you are ready\n"\
-"for more - but you don't know where\n"\
-"to find more when the demons hide\n"\
-"like cowards when they see you."
 
 //
 // Character cast strings F_FINALE.C

@@ -559,7 +559,7 @@ static int ST_cheat_spechits()
     dummy.tag = 666;
     if (gamemode == commercial)
     {
-	if (P_CheckMapTag666())
+	if (gamemap == 7)
 	{
 	    // Mancubi
 	    speciallines += EV_DoFloor(&dummy, lowerFloorToLowest);
@@ -1139,12 +1139,6 @@ ST_Responder (event_t* ev)
       
       if (gamemode == commercial)
       {
-	if (gamemission == pack_master)
-	    epsd = 3;
-	else
-	if (gamemission == pack_nerve)
-	    epsd = 2;
-	else
 	epsd = 0;
 	map = (buf[0] - '0')*10 + buf[1] - '0';
       }
@@ -1181,13 +1175,6 @@ ST_Responder (event_t* ev)
           }
           if (epsd < 1)
           {
-              return false;
-          }
-          if (epsd > 4)
-          {
-              // [crispy] Sigil
-              if (!(crispy->haved1e5 && epsd == 5) &&
-                  !(crispy->haved1e6 && epsd == 6))
               return false;
           }
           if (epsd == 4 && gameversion < exe_ultimate)
@@ -1227,14 +1214,6 @@ ST_Responder (event_t* ev)
               return false;
           }
           if (map > 40)
-          {
-              return false;
-          }
-          if (map > 9 && gamemission == pack_nerve)
-          {
-              return false;
-          }
-          if (map > 21 && gamemission == pack_master)
           {
               return false;
           }
