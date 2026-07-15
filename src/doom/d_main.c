@@ -1984,32 +1984,6 @@ void D_DoomMain (void)
     // Generate the WAD hash table.  Speed things up a bit.
     W_GenerateHashTable();
 
-    // [crispy] allow overriding of special-casing
-
-    //!
-    // @category mod
-    //
-    // Disable automatic loading of Master Levels, No Rest for the Living and
-    // Sigil.
-    //
-    if (!M_ParmExists("-nosideload") && gamemode != shareware &&
-        !demolumpname[0] && !M_CheckParmWithArgs("-record", 1))
-    {
-	if (gamemode == retail &&
-	    gameversion == exe_ultimate &&
-	    gamevariant != freedoom &&
-	    strncasecmp(M_BaseName(iwadfile), "rekkr", 5))
-	{
-		D_LoadSigilWads();
-	}
-
-	if (gamemission == doom2)
-	{
-		D_LoadNerveWad();
-		D_LoadMasterlevelsWad();
-	}
-    }
-
     // Load DEHACKED lumps from WAD files - but only if we give the right
     // command line parameter.
 
@@ -2132,18 +2106,6 @@ void D_DoomMain (void)
             I_GetSfxLumpNum(&S_sfx[sfx_dbcls])  != -1    // [crispy] closing sound
         )
     );
-
-    // [crispy] check for presence of a 5th episode
-    crispy->haved1e5 = (gameversion == exe_ultimate) &&
-                       (W_CheckNumForName("m_epi5") != -1) &&
-                       (W_CheckNumForName("e5m1") != -1) &&
-                       (W_CheckNumForName("wilv40") != -1);
-
-    // [crispy] check for presence of a 6th episode
-    crispy->haved1e6 = (gameversion == exe_ultimate) &&
-                       (W_CheckNumForName("m_epi6") != -1) &&
-                       (W_CheckNumForName("e6m1") != -1) &&
-                       (W_CheckNumForName("wilv50") != -1);
 
     // [crispy] check for presence of E1M10
     crispy->havee1m10 = (gamemode == retail) &&

@@ -1188,16 +1188,6 @@ int P_GetNumForMap (int episode, int map, boolean critical)
 	DEH_snprintf(lumpname, 9, "E1M10");
     }
 
-    // [crispy] NRFTL / The Master Levels
-    if (crispy->havenerve && episode == 2 && map <= 9)
-    {
-	strcat(lumpname, "N");
-    }
-    if (crispy->havemaster && episode == 3 && map <= 21)
-    {
-	strcat(lumpname, "M");
-    }
-
     return critical ? W_GetNumForName(lumpname) : W_CheckNumForName(lumpname);
 }
 

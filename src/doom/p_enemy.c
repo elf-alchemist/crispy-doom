@@ -1719,14 +1719,6 @@ static boolean CheckBossEnd(mobjtype_t motype)
                 return (gamemap == 6 && motype == MT_CYBORG)
                     || (gamemap == 8 && motype == MT_SPIDER);
 
-            // [crispy] no trigger for auto-loaded Sigil E5
-            case 5:
-                return (gamemap == 8 && !critical->havesigil);
-
-            // [crispy] no trigger for auto-loaded Sigil II E6
-            case 6:
-                return (gamemap == 8 && !critical->havesigil2);
-
             default:
                 return gamemap == 8;
 	}

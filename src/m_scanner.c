@@ -248,7 +248,7 @@ static void Unescape(char *str)
     *str = 0;
 }
 
-boolean SC_GetNextToken(scanner_t *s, boolean expandstate)
+boolean SCN_GetNextToken(scanner_t *s, boolean expandstate)
 {
     int start;
     int end;
@@ -519,18 +519,18 @@ boolean SC_GetNextToken(scanner_t *s, boolean expandstate)
 
 // Skips all Tokens in current line and parses the first token on the next
 // line.
-void SC_GetNextLineToken(scanner_t *s)
+void SCN_GetNextLineToken(scanner_t *s)
 {
     int line = s->line;
-    while (SC_GetNextToken(s, true) && s->line == line)
+    while (SCN_GetNextToken(s, true) && s->line == line)
         ;
 }
 
-boolean SC_CheckToken(scanner_t *s, char token)
+boolean SCN_CheckToken(scanner_t *s, char token)
 {
     if (s->neednext)
     {
-        if (!SC_GetNextToken(s, false))
+        if (!SCN_GetNextToken(s, false))
         {
             return false;
         }
@@ -548,7 +548,7 @@ boolean SC_CheckToken(scanner_t *s, char token)
     return false;
 }
 
-void SC_Error(scanner_t *s, const char *msg, ...)
+void SCN_Error(scanner_t *s, const char *msg, ...)
 {
     char buffer[1024];
     va_list args;
@@ -560,9 +560,9 @@ void SC_Error(scanner_t *s, const char *msg, ...)
             s->state.tokenlinepos + 1, buffer);
 }
 
-void SC_MustGetToken(scanner_t *s, char token)
+void SCN_MustGetToken(scanner_t *s, char token)
 {
-    if (SC_CheckToken(s, token))
+    if (SCN_CheckToken(s, token))
     {
         return;
     }
@@ -570,34 +570,34 @@ void SC_MustGetToken(scanner_t *s, char token)
     ExpandState(s);
     if (s->state.token == TK_NoToken)
     {
-        SC_Error(s, "Unexpected end of script.");
+        SCN_Error(s, "Unexpected end of script.");
     }
     else if (token < TK_NumSpecialTokens &&
              s->state.token < TK_NumSpecialTokens)
     {
-        SC_Error(s, "Expected '%s' but got '%s' instead.",
+        SCN_Error(s, "Expected '%s' but got '%s' instead.",
                  token_names[(int) token], token_names[(int) s->state.token]);
     }
     else if (token < TK_NumSpecialTokens &&
              s->state.token >= TK_NumSpecialTokens)
     {
-        SC_Error(s, "Expected '%s' but got '%c' instead.",
+        SCN_Error(s, "Expected '%s' but got '%c' instead.",
                  token_names[(int) token], s->state.token);
     }
     else if (token >= TK_NumSpecialTokens &&
              s->state.token < TK_NumSpecialTokens)
     {
-        SC_Error(s, "Expected '%c' but got '%s' instead.", token,
+        SCN_Error(s, "Expected '%c' but got '%s' instead.", token,
                  token_names[(int) s->state.token]);
     }
     else
     {
-        SC_Error(s, "Expected '%c' but got '%c' instead.", token,
+        SCN_Error(s, "Expected '%c' but got '%c' instead.", token,
                  s->state.token);
     }
 }
 
-void SC_Rewind(scanner_t *s) // Only can rewind one step.
+void SCN_Rewind(scanner_t *s) // Only can rewind one step.
 {
     s->neednext = false;
 
@@ -611,26 +611,26 @@ void SC_Rewind(scanner_t *s) // Only can rewind one step.
     CheckForWhitespace(s);
 }
 
-boolean SC_SameLine(scanner_t *s)
+boolean SCN_SameLine(scanner_t *s)
 {
     return (s->state.tokenline == s->line);
 }
 
-boolean SC_CheckStringOrIdent(scanner_t *s)
+boolean SCN_CheckStringOrIdent(scanner_t *s)
 {
-    return (SC_CheckToken(s, TK_StringConst) ||
-            SC_CheckToken(s, TK_Identifier));
+    return (SCN_CheckToken(s, TK_StringConst) ||
+            SCN_CheckToken(s, TK_Identifier));
 }
 
-void SC_MustGetStringOrIdent(scanner_t *s)
+void SCN_MustGetStringOrIdent(scanner_t *s)
 {
-    if (!SC_CheckStringOrIdent(s))
+    if (!SCN_CheckStringOrIdent(s))
     {
-        SC_Error(s, "expected string constant or identifier");
+        SCN_Error(s, "expected string constant or identifier");
     }
 }
 
-boolean SC_GetNextRawString(scanner_t *s, boolean expandstate)
+boolean SCN_GetNextRawString(scanner_t *s, boolean expandstate)
 {
     int start;
     int end;
@@ -742,11 +742,11 @@ boolean SC_GetNextRawString(scanner_t *s, boolean expandstate)
     return false;
 }
 
-boolean SC_CheckRawToken(scanner_t *s, char token)
+boolean SCN_CheckRawToken(scanner_t *s, char token)
 {
     if (s->neednext)
     {
-        if (!SC_GetNextRawString(s, false))
+        if (!SCN_GetNextRawString(s, false))
         {
             return false;
         }
@@ -762,32 +762,32 @@ boolean SC_CheckRawToken(scanner_t *s, char token)
     return false;
 }
 
-boolean SC_TokensLeft(scanner_t *s)
+boolean SCN_TokensLeft(scanner_t *s)
 {
     return s->scanpos < s->length;
 }
 
-const char *SC_GetString(scanner_t *s)
+const char *SCN_GetString(scanner_t *s)
 {
     return s->state.string;
 }
 
-int SC_GetNumber(scanner_t *s)
+int SCN_GetNumber(scanner_t *s)
 {
     return s->state.number;
 }
 
-boolean SC_GetBoolean(scanner_t *s)
+boolean SCN_GetBoolean(scanner_t *s)
 {
     return (boolean) s->state.number;
 }
 
-double SC_GetDecimal(scanner_t *s)
+double SCN_GetDecimal(scanner_t *s)
 {
     return s->state.decimal;
 }
 
-scanner_t *SC_Open(const char *scriptname, const char *data, int length)
+scanner_t *SCN_Open(const char *scriptname, const char *data, int length)
 {
     scanner_t *s = calloc(1, sizeof(*s));
 
@@ -803,7 +803,7 @@ scanner_t *SC_Open(const char *scriptname, const char *data, int length)
     return s;
 }
 
-void SC_Close(scanner_t *s)
+void SCN_Close(scanner_t *s)
 {
     if (s->state.string)
     {
@@ -824,40 +824,16 @@ void SC_Close(scanner_t *s)
     free(s);
 }
 
-int SC_CheckKeywordInternal(scanner_t *s, const char *keywords[], int count)
+int SCN_GetNegativeInteger(scanner_t *s)
 {
-    const char *string = SC_GetString(s);
-    for (int i = 0; i < count; ++i)
-    {
-        if (strcasecmp(keywords[i], string) == 0)
-        {
-            return i;
-        }
-    }
-    return -1;
+    boolean neg = SCN_CheckToken(s, '-');
+    SCN_MustGetToken(s, TK_IntConst);
+    return neg ? -SCN_GetNumber(s) : SCN_GetNumber(s);
 }
 
-int SC_RequireKeywordInternal(scanner_t *s, const char *keywords[], int count)
+double SCN_GetNegativeDecimal(scanner_t *s)
 {
-    int result = SC_CheckKeywordInternal(s, keywords, count);
-    if (result >= 0)
-    {
-        return result;
-    }
-    SC_Error(s, "Invalid keyword at this point.");
-    return -1;
-}
-
-int SC_GetNegativeInteger(scanner_t *s)
-{
-    boolean neg = SC_CheckToken(s, '-');
-    SC_MustGetToken(s, TK_IntConst);
-    return neg ? -SC_GetNumber(s) : SC_GetNumber(s);
-}
-
-double SC_GetNegativeDecimal(scanner_t *s)
-{
-    boolean neg = SC_CheckToken(s, '-');
-    SC_MustGetToken(s, TK_FloatConst);
-    return neg ? -SC_GetDecimal(s) : SC_GetDecimal(s);
+    boolean neg = SCN_CheckToken(s, '-');
+    SCN_MustGetToken(s, TK_FloatConst);
+    return neg ? -SCN_GetDecimal(s) : SCN_GetDecimal(s);
 }

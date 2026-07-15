@@ -303,7 +303,7 @@ void S_Init(int sfxVolume, int musicVolume)
     I_AtExit(S_Shutdown, true);
 
     // [crispy] initialize dedicated music tracks for the 4th episode
-    for (i = mus_e4m1; i <= mus_e6m9; i++)
+    for (i = mus_e4m1; i <= mus_e4m9; i++)
     {
         musicinfo_t *const music = &S_music[i];
         char namebuf[9];
@@ -958,7 +958,7 @@ void S_ChangeMusic(int musicnum, int looping)
 
         if (gamemode == commercial)
         {
-            musicnum = mus_runnin + (umusicnum % (mus_nrftl1 - mus_runnin));
+            musicnum = mus_runnin + (umusicnum % (NUMMUSIC - mus_runnin));
         }
         else
         {

@@ -515,38 +515,13 @@ static void HU_SetSpecialLevelName (const char *wad, const char **name)
 
 static int hu_widescreendelta;
 
-static const int kex_masterlevels[] =
-{
-    1,  //  1
-    2,  //  2
-    3,  //  3
-    5,  //  4
-    4,  //  5
-    9,  //  6
-    8,  //  7
-    10, //  8
-    6,  //  9
-    19, // 10
-    12, // 11
-    13, // 12
-    16, // 13
-    17, // 14
-    18, // 15
-    7,  // 16
-    11, // 17
-    20, // 18
-    14, // 19
-    15, // 20
-    21  // 21
-};
-
 void HU_Start(void)
 {
 
     int		i;
     const char *s;
     // [crispy] string buffers for map title, WAD file name and level digits
-    char	buf[8], digitbuf[4];
+    char	buf[8];
     char	*ptr = NULL, *replacement = NULL;
 
     if (headsupactive)

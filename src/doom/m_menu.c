@@ -1314,7 +1314,7 @@ void M_NewGame(int choice)
 	
     // Chex Quest disabled the episode select screen, as did Doom II.
 
-    if ((gamemode == commercial && !crispy->havenerve && !crispy->havemaster) || gameversion == exe_chex) // [crispy] NRFTL / The Master Levels
+    if (gamemode == commercial || gameversion == exe_chex)
 	M_SetupNextMenu(&NewDef);
     else
 	M_SetupNextMenu(&EpiDef);
@@ -1373,9 +1373,6 @@ void M_Episode(int choice)
     }
 
     epi = choice;
-    // [crispy] have Sigil II loaded but not Sigil
-    if (epi == 4 && crispy->haved1e6 && !crispy->haved1e5)
-        epi = 5;
     M_SetupNextMenu(&NewDef);
 }
 
@@ -2249,9 +2246,6 @@ static int G_GotoNextLevel(void)
     12, 13, 14, 15, 31, 17, 18, 19, 20, 21,
     22, 23, 24, 25, 26, 27, 28, 29, 30, 1,
     32, 16, 3
-  };
-  byte nerve_next[9] = {
-    2, 3, 4, 9, 6, 7, 8, 1, 5
   };
 
   int changed = false;

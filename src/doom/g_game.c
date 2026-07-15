@@ -1921,12 +1921,6 @@ static const int chexpars[6] =
     0,120,360,480,200,360
 }; 
  
-// [crispy] No Rest For The Living par times from the BFG Edition
-static const int npars[9] =
-{
-    75,105,120,105,210,105,165,105,135
-};
-
 //
 // G_DoCompleted 
 //
@@ -2653,16 +2647,6 @@ G_InitNew
     if (skill > sk_nightmare)
 	skill = sk_nightmare;
 
-  // [crispy] if NRFTL is not available, "episode 2" may mean The Master Levels ("episode 3")
-  if (gamemode == commercial)
-  {
-    if (episode < 1)
-      episode = 1;
-    else
-    if (episode == 2 && !crispy->havenerve)
-      episode = crispy->havemaster ? 3 : 1;
-  }
-
   // [crispy] only fix episode/map if it doesn't exist
   if (P_GetNumForMap(episode, map, false) < 0)
   {
@@ -2705,14 +2689,6 @@ G_InitNew
   }
 
     M_ClearRandom ();
-
-    // [crispy] Spider Mastermind gets increased health in Sigil II. Normally
-    // the Sigil II DEH handles this, but we don't load the DEH if the WAD gets
-    // sideloaded.
-    if (crispy->havesigil2 && crispy->havesigil2 != (char *)-1)
-    {
-        mobjinfo[MT_SPIDER].spawnhealth = (episode == 6) ? 9000 : 3000;
-    }
 
     if (skill == sk_nightmare || respawnparm )
 	respawnmonsters = true;

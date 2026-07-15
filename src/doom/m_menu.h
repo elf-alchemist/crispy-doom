@@ -72,4 +72,7 @@ extern int numeric_entry;
 #define EPISODES_RECT(n) \
     {0, M_Y_EPISODES + (n) * LINEHEIGHT, SCREENWIDTH, LINEHEIGHT}
 
+void MN_ClearEpisodes(void);
+void MN_AddEpisode(const char *map, const char *gfx, const char *txt, char key);
+
 #endif

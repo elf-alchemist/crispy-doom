@@ -21,6 +21,7 @@
 #include "doomstat.h"
 #include "doomtype.h"
 #include "m_array.h"
+#include "m_menu.h"
 #include "m_misc.h"
 #include "m_scanner.h"
 #include "w_wad.h"
@@ -327,18 +328,18 @@ static char *ParseMultiString(scanner_t *s)
 
     do
     {
-        SC_MustGetToken(s, TK_StringConst);
+        SCN_MustGetToken(s, TK_StringConst);
         if (build == NULL)
         {
-            build = M_StringDuplicate(SC_GetString(s));
+            build = M_StringDuplicate(SCN_GetString(s));
         }
         else
         {
             char *tmp = build;
-            build = M_StringJoin(tmp, "\n", SC_GetString(s));
+            build = M_StringJoin(tmp, "\n", SCN_GetString(s));
             free(tmp);
         }
-    } while (SC_CheckToken(s, ','));
+    } while (SCN_CheckToken(s, ','));
 
     return build;
 }
@@ -347,12 +348,12 @@ static char *ParseMultiString(scanner_t *s)
 
 static void ParseLumpName(scanner_t *s, char *buffer)
 {
-    SC_MustGetToken(s, TK_StringConst);
-    if (strlen(SC_GetString(s)) > 8)
+    SCN_MustGetToken(s, TK_StringConst);
+    if (strlen(SCN_GetString(s)) > 8)
     {
-        SC_Error(s, "String too long. Maximum size is 8 characters.");
+        SCN_Error(s, "String too long. Maximum size is 8 characters.");
     }
-    strncpy(buffer, SC_GetString(s), 8);
+    strncpy(buffer, SCN_GetString(s), 8);
     buffer[8] = 0;
     M_ForceUppercase(buffer);
 }
@@ -364,51 +365,51 @@ static void ParseLumpName(scanner_t *s, char *buffer)
 static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
 {
     char *prop;
-    SC_MustGetToken(s, TK_Identifier);
-    prop = M_StringDuplicate(SC_GetString(s));
+    SCN_MustGetToken(s, TK_Identifier);
+    prop = M_StringDuplicate(SCN_GetString(s));
 
-    SC_MustGetToken(s, '=');
+    SCN_MustGetToken(s, '=');
     if (!strcasecmp(prop, "levelname"))
     {
-        SC_MustGetToken(s, TK_StringConst);
-        ReplaceString(&mape->levelname, SC_GetString(s));
+        SCN_MustGetToken(s, TK_StringConst);
+        ReplaceString(&mape->levelname, SCN_GetString(s));
     }
     else if (!strcasecmp(prop, "label"))
     {
-        if (SC_CheckToken(s, TK_Identifier))
+        if (SCN_CheckToken(s, TK_Identifier))
         {
-            if (!strcasecmp(SC_GetString(s), "clear"))
+            if (!strcasecmp(SCN_GetString(s), "clear"))
             {
                 mape->flags |= MapInfo_LabelClear;
             }
             else
             {
-                SC_Error(s, "Either 'clear' or string constant expected");
+                SCN_Error(s, "Either 'clear' or string constant expected");
             }
         }
         else
         {
             mape->flags &= ~MapInfo_LabelClear;
-            SC_MustGetToken(s, TK_StringConst);
-            ReplaceString(&mape->label, SC_GetString(s));
+            SCN_MustGetToken(s, TK_StringConst);
+            ReplaceString(&mape->label, SCN_GetString(s));
         }
     }
     else if (!strcasecmp(prop, "author"))
     {
-        SC_MustGetToken(s, TK_StringConst);
-        ReplaceString(&mape->author, SC_GetString(s));
+        SCN_MustGetToken(s, TK_StringConst);
+        ReplaceString(&mape->author, SCN_GetString(s));
     }
     else if (!strcasecmp(prop, "episode"))
     {
-        if (SC_CheckToken(s, TK_Identifier))
+        if (SCN_CheckToken(s, TK_Identifier))
         {
-            if (!strcasecmp(SC_GetString(s), "clear"))
+            if (!strcasecmp(SCN_GetString(s), "clear"))
             {
                 MN_ClearEpisodes();
             }
             else
             {
-                SC_Error(s, "Either 'clear' or string constant expected");
+                SCN_Error(s, "Either 'clear' or string constant expected");
             }
         }
         else
@@ -418,15 +419,15 @@ static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
             char key = 0;
 
             ParseLumpName(s, lumpname);
-            if (SC_CheckToken(s, ','))
+            if (SCN_CheckToken(s, ','))
             {
-                SC_MustGetToken(s, TK_StringConst);
-                alttext = M_StringDuplicate(SC_GetString(s));
-                if (SC_CheckToken(s, ','))
+                SCN_MustGetToken(s, TK_StringConst);
+                alttext = M_StringDuplicate(SCN_GetString(s));
+                if (SCN_CheckToken(s, ','))
                 {
                     const char *tmp;
-                    SC_MustGetToken(s, TK_StringConst);
-                    tmp = SC_GetString(s);
+                    SCN_MustGetToken(s, TK_StringConst);
+                    tmp = SCN_GetString(s);
                     key = M_ToLower(tmp[0]);
                 }
             }
@@ -444,7 +445,7 @@ static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
         ParseLumpName(s, mape->nextmap);
         if (!G_ValidateMapName(mape->nextmap, NULL, NULL))
         {
-            SC_Error(s, "Invalid map name %s.", mape->nextmap);
+            SCN_Error(s, "Invalid map name %s.", mape->nextmap);
         }
     }
     else if (!strcasecmp(prop, "nextsecret"))
@@ -452,7 +453,7 @@ static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
         ParseLumpName(s, mape->nextsecret);
         if (!G_ValidateMapName(mape->nextsecret, NULL, NULL))
         {
-            SC_Error(s, "Invalid map name %s", mape->nextsecret);
+            SCN_Error(s, "Invalid map name %s", mape->nextsecret);
         }
     }
     else if (!strcasecmp(prop, "levelpic"))
@@ -474,8 +475,8 @@ static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
     }
     else if (!strcasecmp(prop, "endcast"))
     {
-        SC_MustGetToken(s, TK_BoolConst);
-        if (SC_GetBoolean(s))
+        SCN_MustGetToken(s, TK_BoolConst);
+        if (SCN_GetBoolean(s))
         {
             mape->flags |= MapInfo_EndGameCast;
         }
@@ -487,8 +488,8 @@ static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
     }
     else if (!strcasecmp(prop, "endbunny"))
     {
-        SC_MustGetToken(s, TK_BoolConst);
-        if (SC_GetBoolean(s))
+        SCN_MustGetToken(s, TK_BoolConst);
+        if (SCN_GetBoolean(s))
         {
             mape->flags |= MapInfo_EndGameBunny;
         }
@@ -505,8 +506,8 @@ static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
     }
     else if (!strcasecmp(prop, "endgame"))
     {
-        SC_MustGetToken(s, TK_BoolConst);
-        if (SC_GetBoolean(s))
+        SCN_MustGetToken(s, TK_BoolConst);
+        if (SCN_GetBoolean(s))
         {
             mape->flags |= MapInfo_EndGameStandard;
         }
@@ -534,8 +535,8 @@ static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
     }
     else if (!strcasecmp(prop, "nointermission"))
     {
-        SC_MustGetToken(s, TK_BoolConst);
-        if (SC_GetBoolean(s))
+        SCN_MustGetToken(s, TK_BoolConst);
+        if (SCN_GetBoolean(s))
         {
             mape->flags |= MapInfo_NoIntermission;
         }
@@ -546,20 +547,20 @@ static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
     }
     else if (!strcasecmp(prop, "partime"))
     {
-        SC_MustGetToken(s, TK_IntConst);
-        mape->partime = SC_GetNumber(s);
+        SCN_MustGetToken(s, TK_IntConst);
+        mape->partime = SCN_GetNumber(s);
     }
     else if (!strcasecmp(prop, "intertext"))
     {
-        if (SC_CheckToken(s, TK_Identifier))
+        if (SCN_CheckToken(s, TK_Identifier))
         {
-            if (!strcasecmp(SC_GetString(s), "clear"))
+            if (!strcasecmp(SCN_GetString(s), "clear"))
             {
                 mape->flags |= MapInfo_InterTextClear;
             }
             else
             {
-                SC_Error(s, "Either 'clear' or string constant expected");
+                SCN_Error(s, "Either 'clear' or string constant expected");
             }
         }
         else
@@ -574,15 +575,15 @@ static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
     }
     else if (!strcasecmp(prop, "intertextsecret"))
     {
-        if (SC_CheckToken(s, TK_Identifier))
+        if (SCN_CheckToken(s, TK_Identifier))
         {
-            if (!strcasecmp(SC_GetString(s), "clear"))
+            if (!strcasecmp(SCN_GetString(s), "clear"))
             {
                 mape->flags |= MapInfo_InterTextSecretClear;
             }
             else
             {
-                SC_Error(s, "Either 'clear' or string constant expected");
+                SCN_Error(s, "Either 'clear' or string constant expected");
             }
         }
         else
@@ -605,8 +606,8 @@ static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
     }
     else if (!strcasecmp(prop, "bossaction"))
     {
-        SC_MustGetToken(s, TK_Identifier);
-        if (!strcasecmp(SC_GetString(s), "clear"))
+        SCN_MustGetToken(s, TK_Identifier);
+        if (!strcasecmp(SCN_GetString(s), "clear"))
         {
             mape->flags |= MapInfo_BossActionClear;
             array_free(mape->bossactions);
@@ -617,22 +618,22 @@ static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
             mape->flags &= ~MapInfo_BossActionClear;
             for (type = 0; type < arrlen(actor_names); ++type)
             {
-                if (!strcasecmp(SC_GetString(s), actor_names[type]))
+                if (!strcasecmp(SCN_GetString(s), actor_names[type]))
                 {
                     break;
                 }
             }
             if (type == arrlen(actor_names))
             {
-                SC_Error(s, "bossaction: unknown thing type '%s'",
-                         SC_GetString(s));
+                SCN_Error(s, "bossaction: unknown thing type '%s'",
+                         SCN_GetString(s));
             }
-            SC_MustGetToken(s, ',');
-            SC_MustGetToken(s, TK_IntConst);
-            special = SC_GetNumber(s);
-            SC_MustGetToken(s, ',');
-            SC_MustGetToken(s, TK_IntConst);
-            tag = SC_GetNumber(s);
+            SCN_MustGetToken(s, ',');
+            SCN_MustGetToken(s, TK_IntConst);
+            special = SCN_GetNumber(s);
+            SCN_MustGetToken(s, ',');
+            SCN_MustGetToken(s, TK_IntConst);
+            tag = SCN_GetNumber(s);
             // allow no 0-tag specials here, unless a level exit.
             if (tag != 0 || special == 11 || special == 51 || special == 52 ||
                 special == 124)
@@ -648,8 +649,8 @@ static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
     {
         do
         {
-            SC_GetNextToken(s, true);
-        } while (SC_CheckToken(s, ','));
+            SCN_GetNextToken(s, true);
+        } while (SCN_CheckToken(s, ','));
     }
 
     free(prop);
@@ -657,21 +658,21 @@ static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
 
 static void ParseMapEntry(scanner_t *s, mapentry_t *entry)
 {
-    SC_MustGetToken(s, TK_Identifier);
-    if (strcasecmp(SC_GetString(s), "map"))
+    SCN_MustGetToken(s, TK_Identifier);
+    if (strcasecmp(SCN_GetString(s), "map"))
     {
-        SC_Error(s, "Expected 'map' but got '%s' instead", SC_GetString(s));
+        SCN_Error(s, "Expected 'map' but got '%s' instead", SCN_GetString(s));
     }
 
-    SC_MustGetToken(s, TK_Identifier);
-    if (!G_ValidateMapName(SC_GetString(s), NULL, NULL))
+    SCN_MustGetToken(s, TK_Identifier);
+    if (!G_ValidateMapName(SCN_GetString(s), NULL, NULL))
     {
-        SC_Error(s, "Invalid map name %s", SC_GetString(s));
+        SCN_Error(s, "Invalid map name %s", SCN_GetString(s));
     }
-    ReplaceString(&entry->mapname, SC_GetString(s));
+    ReplaceString(&entry->mapname, SCN_GetString(s));
 
-    SC_MustGetToken(s, '{');
-    while (!SC_CheckToken(s, '}'))
+    SCN_MustGetToken(s, '{');
+    while (!SCN_CheckToken(s, '}'))
     {
         ParseStandardProperty(s, entry);
     }
@@ -679,9 +680,9 @@ static void ParseMapEntry(scanner_t *s, mapentry_t *entry)
 
 void G_ParseMapInfo(int lumpnum)
 {
-    scanner_t *s = SC_Open("UMAPINFO", W_CacheLumpNum(lumpnum, PU_CACHE),
+    scanner_t *s = SCN_Open("UMAPINFO", W_CacheLumpNum(lumpnum, PU_CACHE),
                            W_LumpLength(lumpnum));
-    while (SC_TokensLeft(s))
+    while (SCN_TokensLeft(s))
     {
         mapentry_t parsed = {0};
         int i;
@@ -747,7 +748,7 @@ void G_ParseMapInfo(int lumpnum)
         }
     }
 
-    SC_Close(s);
+    SCN_Close(s);
 }
 
 mapentry_t *G_LookupMapinfo(int episode, int map)
