@@ -25,16 +25,15 @@ typedef enum
     MapInfo_EndGameStandard = (1u << 3),
     MapInfo_EndGameCast = (1u << 4),
     MapInfo_EndGameBunny = (1u << 5),
-    MapInfo_EndGameCustomFinale = (1u << 6),
     MapInfo_EndGame = (MapInfo_EndGameArt | MapInfo_EndGameStandard
                        | MapInfo_EndGameCast | MapInfo_EndGameBunny),
-    MapInfo_EndGameClear = (1u << 7),
+    MapInfo_EndGameClear = (1u << 6),
 
-    MapInfo_NoIntermission = (1u << 8),
-    MapInfo_InterTextClear = (1u << 9),
-    MapInfo_InterTextSecretClear = (1u << 10),
+    MapInfo_NoIntermission = (1u << 7),
+    MapInfo_InterTextClear = (1u << 8),
+    MapInfo_InterTextSecretClear = (1u << 9),
 
-    MapInfo_BossActionClear = (1u << 11)
+    MapInfo_BossActionClear = (1u << 10)
 } mapinfo_flags_t;
 
 typedef struct
@@ -58,11 +57,8 @@ typedef struct mapentry_s
     char music[9];
     char skytexture[9];
     char endpic[9];
-    char endfinale[9];
     char exitpic[9];
     char enterpic[9];
-    char exitanim[9];
-    char enteranim[9];
     char interbackdrop[9];
     char intermusic[9];
     int partime;
@@ -77,8 +73,6 @@ extern boolean EpiCustom;
 mapentry_t *G_LookupMapinfo(int episode, int map);
 
 boolean G_ValidateMapName(const char *mapname, int *episode, int *map);
-
-char *G_MapName(int e, int m);
 
 void G_ParseMapInfo(int lumpnum);
 

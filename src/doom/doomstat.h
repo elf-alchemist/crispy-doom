@@ -36,6 +36,7 @@
 // Game mode/mission
 #include "d_mode.h"
 
+#include "m_misc.h"
 #include "net_defs.h"
 
 #include "crispy.h"
@@ -93,6 +94,7 @@ extern  boolean		autostart;
 extern  skill_t         gameskill;
 extern  int		gameepisode;
 extern  int		gamemap;
+extern  struct mapentry_s *gamemapinfo;
 
 // If non-zero, exit the level after this number of minutes
 extern  int             timelimit;
@@ -280,5 +282,16 @@ extern	int		rndindex;
 
 extern  ticcmd_t       *netcmds;
 
+char *G_MapName(int e, int m)
+{
+    static char name[9];
+
+    if (gamemode == commercial)
+        M_snprintf(name, sizeof(name), "MAP%02d", m);
+    else
+        M_snprintf(name, sizeof(name), "E%dM%d", e, m);
+
+    return name;
+}
 
 #endif

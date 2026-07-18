@@ -499,11 +499,6 @@ static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
             mape->flags |= MapInfo_EndGameClear;
         }
     }
-    else if (!strcasecmp(prop, "endfinale"))
-    {
-        mape->flags |= MapInfo_EndGameCustomFinale;
-        ParseLumpName(s, mape->endfinale);
-    }
     else if (!strcasecmp(prop, "endgame"))
     {
         SCN_MustGetToken(s, TK_BoolConst);
@@ -524,14 +519,6 @@ static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
     else if (!strcasecmp(prop, "enterpic"))
     {
         ParseLumpName(s, mape->enterpic);
-    }
-    else if (!strcasecmp(prop, "exitanim"))
-    {
-        ParseLumpName(s, mape->exitanim);
-    }
-    else if (!strcasecmp(prop, "enteranim"))
-    {
-        ParseLumpName(s, mape->enteranim);
     }
     else if (!strcasecmp(prop, "nointermission"))
     {
@@ -766,19 +753,6 @@ mapentry_t *G_LookupMapinfo(int episode, int map)
     }
 
     return NULL;
-}
-
-
-char *G_MapName(int e, int m)
-{
-    static char name[9];
-
-    if (gamemode == commercial)
-        M_snprintf(name, sizeof(name), "MAP%02d", m);
-    else
-        M_snprintf(name, sizeof(name), "E%dM%d", e, m);
-
-    return name;
 }
 
 // Check if the given map name can be expressed as a gameepisode/gamemap pair

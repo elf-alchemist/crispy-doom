@@ -319,8 +319,6 @@ enum
     ep2,
     ep3,
     ep4,
-    ep5, // [crispy] Sigil
-    ep6, // [crispy] Sigil II
     ep_end
 } episodes_e;
 

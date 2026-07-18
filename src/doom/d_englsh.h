@@ -456,29 +456,6 @@
 "\n"\
 "next stop, hell on earth!"
 
-#define E5TEXT \
-"Baphomet was only doing Satan's bidding\n"\
-"by bringing you back to Hell. Somehow they\n"\
-"didn't understand that you're the reason\n"\
-"they failed in the first place.\n"\
-"\n"\
-"After mopping up the place with your\n"\
-"arsenal, you're ready to face the more\n"\
-"advanced demons that were sent to Earth.\n"\
-"\n"\
-"\n"\
-"Lock and load. Rip and tear."
-
-#define E6TEXT \
-"Satan erred in casting you to Hell's\n"\
-"darker depths. His plan failed. He has\n"\
-"tried for so long to destroy you, and he\n"\
-"has lost every single time. His only\n"\
-"option is to flood Earth with demons\n"\
-"and hope you go down fighting.\n"\
-"\n"\
-"Prepare for HELLION!"
-
 // after level 6, put this:
 
 #define C1TEXT \

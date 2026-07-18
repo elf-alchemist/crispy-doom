@@ -28,6 +28,7 @@
 #include "deh_main.h"
 #include "deh_misc.h"
 #include "deh_bexpars.h" // [crispy] bex_pars[]
+#include "g_umapinfo.h" // [crispy]
 
 #include "z_zone.h"
 #include "f_finale.h"
@@ -107,6 +108,7 @@ skill_t         gameskill;
 boolean		respawnmonsters;
 int             gameepisode; 
 int             gamemap; 
+mapentry_t     *gamemapinfo;
 
 // If non-zero, exit the level after this number of minutes.
 
@@ -1900,10 +1902,6 @@ static const int pars[7][10] =
     {0,90,45,90,150,90,90,165,30,135} 
     // [crispy] Episode 4 par times from the BFG Edition
    ,{0,165,255,135,150,180,390,135,360,180}
-    // [crispy] Episode 5 par times from Sigil v1.21
-   ,{0,90,150,360,420,780,420,780,300,660}
-    // [crispy] Episode 6 par times from Sigil II v1.0
-   ,{0,480,300,240,420,510,840,960,390,450}
 }; 
 
 // DOOM II Par Times
@@ -2058,6 +2056,59 @@ void G_DoCompleted (void)
     if (automapactive) 
 	AM_Stop (); 
 	
+    // [crispy] UMAPINFO support
+    wminfo.epsd = gameepisode - 1; 
+    wminfo.last = gamemap - 1;
+    wminfo.lastmapinfo = gamemapinfo;
+    wminfo.nextmapinfo = NULL;
+    umapinfo_partimes = false;
+
+    if (gamemapinfo)
+    {
+      const char *next = NULL;
+      boolean intermission = false;
+
+      if (gamemapinfo->flags & MapInfo_EndGame)
+      {
+        if (gamemapinfo->flags & MapInfo_NoIntermission)
+        {
+          gameaction = ga_victory;
+          return;
+        }
+        else
+        {
+          intermission = true;
+        }
+      }
+
+      if (secretexit && gamemapinfo->nextsecret[0])
+        next = gamemapinfo->nextsecret;
+      else if (gamemapinfo->nextmap[0])
+        next = gamemapinfo->nextmap;
+
+      if (next)
+      {
+        G_ValidateMapName(next, &wminfo.nextep, &wminfo.next);
+        wminfo.nextep--;
+        wminfo.next--;
+        // episode change
+        if (wminfo.nextep != wminfo.epsd)
+        {
+          for (i = 0; i < MAXPLAYERS; i++)
+            players[i].didsecret = false;
+        }
+      }
+
+      if (next || intermission)
+      {
+        wminfo.didsecret = players[consoleplayer].didsecret;
+        wminfo.partime = gamemapinfo->partime * TICRATE;
+        if (wminfo.partime > 0)
+          umapinfo_partimes = true;
+        goto frommapinfo;	// skip past the default setup.
+      }
+    }
+
     if (gamemode != commercial)
     {
         // Chex Quest ends after 5 levels, rather than 8.
@@ -2114,8 +2165,11 @@ void G_DoCompleted (void)
     
 	 
     wminfo.didsecret = players[consoleplayer].didsecret; 
+// [crispy] UMAPINFO support
+/*
     wminfo.epsd = gameepisode -1; 
     wminfo.last = gamemap -1;
+*/
     
     // wminfo.next is 0 biased, unlike gamemap
     if ( gamemode == commercial)
@@ -2185,6 +2239,12 @@ void G_DoCompleted (void)
     // statcheck regression testing.
     if (gamemode == commercial)
     {
+        // [crispy] support [PARS] sections in BEX files
+        if (gamemap >= 1 && gamemap <= 34 && bex_cpars[gamemap - 1])
+        {
+            wminfo.partime = TICRATE * bex_cpars[gamemap - 1];
+        }
+        else
         // map33 reads its par time from beyond the cpars[] array
         if (gamemap == 33)
         {
@@ -2195,12 +2255,7 @@ void G_DoCompleted (void)
 
             wminfo.partime = TICRATE*cpars32;
         }
-        // [crispy] support [PARS] sections in BEX files
-        else if (bex_cpars[gamemap-1])
-        {
-            wminfo.partime = TICRATE*bex_cpars[gamemap-1];
-        }
-        else
+        else if (gamemap >= 1 && gamemap <= 32)
         {
             wminfo.partime = TICRATE*cpars[gamemap-1];
         }
@@ -2209,10 +2264,11 @@ void G_DoCompleted (void)
     // overflows into the cpars array.
     else if (gameepisode < 4 ||
         // [crispy] single player par times for episode 4
-        (gameepisode == 4 && crispy->singleplayer))
+        (gameepisode >= 4 && gameepisode <= 6 && crispy->singleplayer))
     {
         // [crispy] support [PARS] sections in BEX files
-        if (bex_pars[gameepisode][gamemap])
+        if (gameepisode >= 1 && gameepisode <= 6 && gamemap >= 1 && gamemap <= 9
+            && bex_pars[gameepisode][gamemap])
         {
             wminfo.partime = TICRATE*bex_pars[gameepisode][gamemap];
         }
@@ -2226,10 +2282,19 @@ void G_DoCompleted (void)
             wminfo.partime = TICRATE*pars[gameepisode][gamemap];
         }
     }
-    else
+    // [crispy]
+    else if (gameepisode == 4 && gamemap >= 1 && gamemap <= 9)
     {
         wminfo.partime = TICRATE*cpars[gamemap];
     }
+
+frommapinfo:
+  wminfo.nextmapinfo = G_LookupMapinfo(wminfo.nextep+1, wminfo.next+1);
+
+  wminfo.maxkills = totalkills;
+  wminfo.maxitems = totalitems;
+  wminfo.maxsecret = totalsecret;
+  wminfo.maxfrags = 0;
 
     wminfo.pnum = consoleplayer; 
  

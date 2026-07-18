@@ -303,7 +303,7 @@ static anim_t *anims[NUMEPISODES] =
 
 
 // used to accelerate or skip a stage
-static int		acceleratestage;
+int		acceleratestage;
 
 // wbs->pnum
 static int		me;
@@ -1499,71 +1499,15 @@ void WI_updateStats(void)
 
 }
 
-// [crispy] conditionally draw par times on intermission screen
-static boolean WI_drawParTime (void)
-{
-	extern lumpinfo_t *maplumpinfo;
-
-	boolean result = true;
-
-	// [crispy] PWADs have no par times (including The Master Levels)
-	if (!W_IsIWADLump(maplumpinfo))
-	{
-		result = false;
-	}
-
-	if (gamemode == commercial)
-	{
-		// [crispy] IWAD: Final Doom has no par times
-		if (gamemission == pack_tnt || gamemission == pack_plut)
-		{
-			result = false;
-		}
-
-		// [crispy] IWAD/PWAD: BEX patch provided par times
-		if (bex_cpars[wbs->last])
-		{
-			result = true;
-		}
-	}
-	else
-	{
-		// [crispy] IWAD: Episode 4 has no par times
-		// (but we have for singleplayer games)
-		if (wbs->epsd == 3 && !crispy->singleplayer)
-		{
-			result = false;
-		}
-
-		// [crispy] IWAD/PWAD: BEX patch provided par times for Episode 4
-		// (disguised as par times for Doom II MAP02 to MAP10)
-		if (wbs->epsd == 3 && bex_cpars[wbs->last + 1])
-		{
-			result = true;
-		}
-
-		// [crispy] IWAD/PWAD: BEX patch provided par times for Episodes 1-4
-		if (wbs->epsd <= 3 && bex_pars[wbs->epsd + 1][wbs->last + 1])
-		{
-			result = true;
-		}
-
-		// [crispy] PWAD: par times for Sigil
-		if (wbs->epsd == 4 || wbs->epsd == 5)
-		{
-			result = true;
-		}
-	}
-
-	return result;
-}
-
+// [crispy] reformatted to support UMAPINFO
 void WI_drawStats(void)
 {
     // line height
-    int lh;	
-
-    lh = (3*SHORT(num[0]->height))/2;
+    int lh = (3*SHORT(num[0]->height))/2;
+    int maplump = W_CheckNumForName(G_MapName(wbs->epsd + 1, wbs->last + 1));
+    boolean draw_partime;
+    boolean wide_total;
+    boolean wide_time;
 
     WI_slamBackground();
 
@@ -1581,11 +1525,22 @@ void WI_drawStats(void)
     V_DrawPatch(SP_STATSX, SP_STATSY+2*lh, sp_secret);
     WI_drawPercent(ORIGWIDTH - SP_STATSX, SP_STATSY+2*lh, cnt_secret[0]);
 
+    draw_partime = (W_IsIWADLump(lumpinfo[maplump]) || bex_partimes || umapinfo_partimes) &&
+                                (wbs->epsd < 3 || umapinfo_partimes);
+    // [FG] choose x-position depending on width of time string
+    wide_total = (wbs->totaltimes / TICRATE > 61*59) ||
+                              (SP_TIMEX + SHORT(total->width) >= SCREENWIDTH/4);
+    wide_time = (wide_total && !draw_partime);
+
     V_DrawPatch(SP_TIMEX, SP_TIMEY, timepatch);
-    WI_drawTime(ORIGWIDTH/2 - SP_TIMEX, SP_TIMEY, cnt_time, true);
+    // Why add a hardcoded +8 you ask?
+    // in oder to allow >1h long times, some minor alignment shifting is needed
+    // i.e. PrBoom switched SP_TIMEX to 8, instead of vanilla's 16
+    WI_drawTime((wide_time ? (SCREENWIDTH - SP_TIMEX) : (SCREENWIDTH/2 + 8)),
+                SP_TIMEY, cnt_time, true);
 
     // [crispy] conditionally draw par times on intermission screen
-    if (WI_drawParTime())
+    if (draw_partime)
     {
         V_DrawPatch(ORIGWIDTH/2 + SP_TIMEX, SP_TIMEY, par);
         WI_drawTime(ORIGWIDTH - SP_TIMEX, SP_TIMEY, cnt_par, true);
