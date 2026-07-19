@@ -588,9 +588,10 @@ void
 P_CrossSpecialLine
 ( int		linenum,
   int		side,
-  mobj_t*	thing )
+  mobj_t*	thing,
+  boolean boss )
 {
-    return P_CrossSpecialLinePtr(&lines[linenum], side, thing);
+    return P_CrossSpecialLinePtr(&lines[linenum], side, thing, boss);
 }
 
 // [crispy] more MBF code pointers
@@ -598,7 +599,8 @@ void
 P_CrossSpecialLinePtr
 ( line_t*	line,
   int		side,
-  mobj_t*	thing )
+  mobj_t*	thing,
+  boolean boss )
 {
 //  line_t*	line;
     int		ok;

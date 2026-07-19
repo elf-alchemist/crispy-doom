@@ -22,6 +22,7 @@
 #include <stdlib.h>
 
 // Functions.
+#include "crispy.h"
 #include "deh_str.h"
 #include "i_swap.h"
 #include "i_video.h"
@@ -203,7 +204,7 @@ static boolean MapInfo_Ticker()
         int textcount = 0;
         if (finaletext)
         {
-            float speed = (demorecording || demoplayback || netgame) ? TEXTSPEED : GetTextSpeed();
+            float speed = critical->singleplayer ? TEXTSPEED : GetTextSpeed();
             textcount = strlen(finaletext) * speed + (midstage ? NEWTEXTWAIT : TEXTWAIT);
         }
 
@@ -326,6 +327,7 @@ void F_StartFinale (void)
     finaletext = DEH_String(finaletext);
     finaleflat = DEH_String(finaleflat);
 
+    // [crispy] UMAPINFO
     if (!MapInfo_StartFinale())
     {
         S_ChangeMusic(music_id, true);
@@ -376,7 +378,7 @@ void F_Ticker(void)
         return;
     }
 
-    if (!(demorecording || demoplayback || netgame))
+    if (!critical->singleplayer)
     {
         WI_checkForAccelerate(); // killough 3/28/98: check for acceleration
     }
@@ -397,9 +399,7 @@ void F_Ticker(void)
 
     if (finalestage == F_STAGE_TEXT)
     {
-        float speed = (demorecording || demoplayback || netgame)
-                          ? TEXTSPEED
-                          : GetTextSpeed();
+        float speed = critical->singleplayer ? TEXTSPEED : GetTextSpeed();
         // phares
         // killough 2/28/98
         // changed to allow acceleration
@@ -418,7 +418,7 @@ void F_Ticker(void)
                     S_StartMusic(mus_bunny);
             }
             // you must press a button to continue in Doom 2
-            else if (!(demorecording || demoplayback || netgame) && midstage)
+            else if (!critical->singleplayer && midstage)
             {
             next_level:
                 if (gamemap == 30)
@@ -488,13 +488,12 @@ void F_TextWrite (void)
 	}
 		
 	w = SHORT (hu_font[c]->width);
-	if (cx + w > screen_width)
+	if (cx + w > SCREENWIDTH - WIDESCREENDELTA)
 	{
 		continue;
 	}
 	// [crispy] prevent text from being drawn off-screen vertically
-	if (cy + SHORT(hu_font[c]->height) - SHORT(hu_font[c]->topoffset) >
-	    ORIGHEIGHT)
+	if (cy + SHORT(hu_font[c]->height) - SHORT(hu_font[c]->topoffset) > ORIGHEIGHT)
 	{
 	    break;
 	}

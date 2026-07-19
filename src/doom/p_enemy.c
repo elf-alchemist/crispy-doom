@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "g_umapinfo.h"
+#include "m_array.h"
 #include "m_random.h"
 #include "i_system.h"
 
@@ -323,7 +325,7 @@ boolean P_Move (mobj_t*	actor)
 	    // if the special is not a door
 	    // that can be opened,
 	    // return false
-	    if (P_UseSpecialLine (actor, ld,0))
+	    if (P_UseSpecialLine(actor, ld, 0, false))
 		good = true;
 	}
 	return good;
@@ -1736,7 +1738,74 @@ void A_BossDeath (mobj_t* mo)
     mobj_t*	mo2;
     line_t	junk;
     int		i;
-		
+
+  if (gamemapinfo && gamemapinfo->flags & MapInfo_BossActionClear)
+  {
+      return;
+  }
+
+  if (gamemapinfo && array_size(gamemapinfo->bossactions))
+  {
+      bossaction_t *bossaction;
+
+      // make sure there is a player alive for victory
+      for (i = 0; i < MAXPLAYERS; i++)
+      {
+          if (playeringame[i] && players[i].health > 0)
+          {
+              break;
+          }
+      }
+      if (i == MAXPLAYERS)
+      {
+          return; // no one left alive, so do not end game
+      }
+
+      array_foreach(bossaction, gamemapinfo->bossactions)
+      {
+          if (bossaction->type == mo->type)
+          {
+              break;
+          }
+      }
+      if (bossaction == array_end(gamemapinfo->bossactions))
+      {
+          return; // no matches found
+      }
+
+      // scan the remaining thinkers to see
+      // if all bosses are dead
+      for (th = thinkercap.next; th != &thinkercap; th = th->next)
+      {
+          if (th->function.acv == P_MobjThinker)
+          {
+              mobj_t *mo2 = (mobj_t *)th;
+              if (mo2 != mo && mo2->type == mo->type && mo2->health > 0)
+              {
+                  return; // other boss not dead
+              }
+          }
+      }
+
+      array_foreach(bossaction, gamemapinfo->bossactions)
+      {
+          if (bossaction->type == mo->type)
+          {
+              junk = *lines;
+              junk.special = (short)bossaction->special;
+              junk.tag = (short)bossaction->tag;
+              // use special semantics for line activation to block problem
+              // types.
+              if (!P_UseSpecialLine(mo, &junk, 0, true))
+              {
+                  P_CrossSpecialLinePtr(&junk, 0, mo, true);
+              }
+          }
+      }
+
+      return;
+  }
+
     if ( gamemode == commercial)
     {
 	if (gamemap != 7)

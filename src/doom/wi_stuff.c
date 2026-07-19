@@ -419,6 +419,8 @@ boolean WI_Responder(event_t* ev)
     return false;
 }
 
+static void WI_loadData(void);
+
 static void WI_DrawString(int y, const char* str)
 {
     MN_DrawString(160 - (MN_GetPixelWidth(str) / 2), y, CR_GRAY, str);
@@ -844,11 +846,23 @@ static boolean		snl_pointeron = false;
 
 void WI_initShowNextLoc(void)
 {
-    // [crispy] display tally screen after ExM8
-    if ((gamemode != commercial && gamemap == 8) || (gameversion == exe_chex && gamemap == 5))
+    if (gamemapinfo)
     {
-	G_WorldDone();
-	return;
+        if (gamemapinfo->flags & MapInfo_EndGame)
+        {
+            G_WorldDone();
+            return;
+        }
+  
+        state = ShowNextLoc;
+  
+        // episode change
+        if (wbs->epsd != wbs->nextep)
+        {
+            wbs->epsd = wbs->nextep;
+            wbs->last = wbs->next - 1;
+            WI_loadData();
+        }
     }
 
     state = ShowNextLoc;
@@ -874,6 +888,11 @@ void WI_drawShowNextLoc(void)
     int		i;
     int		last;
     extern boolean secretexit; // [crispy] Master Level support
+
+    if (gamemapinfo && gamemapinfo->flags & MapInfo_EndGame)
+    {
+        return;
+    }
 
     WI_slamBackground();
 

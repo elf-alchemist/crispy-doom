@@ -48,7 +48,7 @@ static void DEH_BEXParsParseLine(deh_context_t *context, char *line, void *tag)
 	if (episode >= 1 && episode <= 6 && map >= 1 && map <= 9)
 	{
 	    bex_pars[episode][map] = partime;
-      bex_partimes |= true;
+	    bex_partimes |= true;
 	}
 	else
 	{
@@ -62,7 +62,7 @@ static void DEH_BEXParsParseLine(deh_context_t *context, char *line, void *tag)
 	if (map >= 1 && map <= 34)
 	{
 	    bex_cpars[map-1] = partime;
-      bex_partimes |= true;
+	    bex_partimes |= true;
 	}
 	else
 	{

@@ -998,11 +998,13 @@ void G_DoLoadLevel (void)
 
     skyflatnum = R_FlatNumForName(DEH_String(SKYFLATNAME));
 
-    // The "Sky never changes in Doom II" bug was fixed in
-    // the id Anthology version of doom2.exe for Final Doom.
+    // [crispy] UMAPINFO
+    if (gamemapinfo && gamemapinfo->skytexture[0])
+    {
+        skytexture = R_TextureNumForName(gamemapinfo->skytexture);
+    }
     // [crispy] correct "Sky never changes in Doom II" bug
-    if ((gamemode == commercial)
-     && (gameversion == exe_final2 || gameversion == exe_chex || true))
+    else if (gamemode == commercial)
     {
         const char *skytexturename;
 
@@ -2328,6 +2330,47 @@ void G_WorldDone (void)
     if (secretexit) 
 	players[consoleplayer].didsecret = true; 
 
+    if (gamemapinfo)
+    {
+        if (gamemapinfo->flags & MapInfo_InterTextClear
+            && gamemapinfo->flags & MapInfo_EndGame)
+        {
+            printf("UMAPINFO: 'intertext = clear' with one of the end game keys.\n");
+        }
+
+        if (secretexit)
+        {
+            if (gamemapinfo->flags & MapInfo_InterTextSecretClear)
+            {
+                return;
+            }
+            if (gamemapinfo->intertextsecret)
+            {
+                F_StartFinale();
+                return;
+            }
+        }
+        else
+        {
+            if (gamemapinfo->flags & MapInfo_EndGame)
+            {
+                // game ends without a status screen.
+                gameaction = ga_victory;
+                return;
+            }
+            else if (gamemapinfo->flags & MapInfo_InterTextClear)
+            {
+                return;
+            }
+            else if (gamemapinfo->intertext)
+            {
+                F_StartFinale();
+                return;
+            }
+        }
+        // if nothing applied, use the defaults.
+    }
+
     if ( gamemode == commercial )
     {
 	switch (gamemap)
@@ -2356,6 +2399,8 @@ void G_DoWorldDone (void)
 {        
     gamestate = GS_LEVEL; 
     gamemap = wminfo.next+1; 
+    gameepisode = wminfo.nextep + 1;
+    gamemapinfo = G_LookupMapinfo(gameepisode, gamemap);
     G_DoLoadLevel (); 
     gameaction = ga_nothing; 
     viewactive = true; 
@@ -2620,6 +2665,7 @@ G_DeferedInitNew
 	// [crispy] update required for recording e. g. when gotonextlevel was used
 	gamemap = d_map;
 	gameepisode = d_episode;
+  gamemapinfo = G_LookupMapinfo(episode, gamemap);
 
 	G_BeginRecording();
     }
@@ -2697,8 +2743,10 @@ G_InitNew
     if (skill > sk_nightmare)
 	skill = sk_nightmare;
 
-  // [crispy] only fix episode/map if it doesn't exist
-  if (P_GetNumForMap(episode, map, false) < 0)
+  // [crispy]
+  // Disable all sanity checks if there are custom episode definitions.
+  // They do not make sense in this case.
+  if (!EpiCustom && P_GetNumForMap(episode, map, false) < 0)
   {
     if (gameversion >= exe_ultimate)
     {

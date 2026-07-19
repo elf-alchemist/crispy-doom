@@ -31,9 +31,7 @@ crispy.c             crispy.h              \
 i_main.c                                   \
 i_system.c           i_system.h            \
 m_argv.c             m_argv.h              \
-m_array.c            m_array.h             \
-m_misc.c             m_misc.h              \
-m_scanner.c          m_scanner.h
+m_misc.c             m_misc.h
 
 # Dedicated server (chocolate-server):
 
@@ -71,6 +69,7 @@ d_mode.c             d_mode.h              \
                      d_ticcmd.h            \
 deh_str.c            deh_str.h             \
 gusconf.c            gusconf.h             \
+g_umapinfo.c         g_umapinfo.h          \
 i_cdmus.c            i_cdmus.h             \
 i_endoom.c           i_endoom.h            \
 i_flmusic.c                                \
@@ -92,11 +91,13 @@ i_winmusic.c                               \
 midifallback.c       midifallback.h        \
 midifile.c           midifile.h            \
 mus2mid.c            mus2mid.h             \
+m_array.c            m_array.h             \
 m_bbox.c             m_bbox.h              \
 m_cheat.c            m_cheat.h             \
 m_config.c           m_config.h            \
 m_controls.c         m_controls.h          \
 m_fixed.c            m_fixed.h             \
+m_scanner.c          m_scanner.h
 net_client.c         net_client.h          \
 net_common.c         net_common.h          \
 net_dedicated.c      net_dedicated.h       \

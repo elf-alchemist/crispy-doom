@@ -1420,7 +1420,7 @@ void MN_AddEpisode(const char *map, const char *gfx, const char *txt, char key)
     EpiMenuMap[EpiDef.numitems] = mapnum;
     strncpy(EpisodeMenu[EpiDef.numitems].name, gfx, 8);
     EpisodeMenu[EpiDef.numitems].name[9] = 0;
-    EpisodeMenu[EpiDef.numitems].alttext = txt ? strdup(txt) : NULL;
+    EpisodeMenu[EpiDef.numitems].alttext = txt ? M_StringDuplicate(txt) : NULL;
     EpisodeMenu[EpiDef.numitems].alphaKey = key;
     EpiDef.numitems++;
 
@@ -2233,69 +2233,105 @@ static int G_ReloadLevel(void)
 
 static int G_GotoNextLevel(void)
 {
-  byte doom_next[6][9] = {
+  byte doom_next[4][9] = {
     {12, 13, 19, 15, 16, 17, 18, 21, 14},
     {22, 23, 24, 25, 29, 27, 28, 31, 26},
     {32, 33, 34, 35, 36, 39, 38, 41, 37},
-    {42, 49, 44, 45, 46, 47, 48, 51, 43},
-    {52, 53, 54, 55, 56, 59, 58, 61, 57},
-    {62, 63, 69, 65, 66, 67, 68, 11, 64},
+    {42, 49, 44, 45, 46, 47, 48, -1, 43},
   };
-  byte doom2_next[33] = {
+  byte doom2_next[32] = {
      2,  3,  4,  5,  6,  7,  8,  9, 10, 11,
     12, 13, 14, 15, 31, 17, 18, 19, 20, 21,
-    22, 23, 24, 25, 26, 27, 28, 29, 30, 1,
-    32, 16, 3
+    22, 23, 24, 25, 26, 27, 28, 29, 30, -1,
+    32, 16
   };
 
-  int changed = false;
+  int epsd = -1, map = -1;
 
-    if (gamemode == commercial)
-    {
-      if (W_CheckNumForName("map31") < 0)
-        doom2_next[14] = 16;
-
-      if (gamemission == pack_hacx)
-      {
-        doom2_next[30] = 16;
-        doom2_next[20] = 1;
-      }
-    }
-    else
-    {
-      if (gamemode == shareware)
-        doom_next[0][7] = 11;
-
-      if (gamemode == registered)
-        doom_next[2][7] = 11;
-
-      if (gameversion == exe_chex)
-      {
-        doom_next[0][2] = 14;
-        doom_next[0][4] = 11;
-      }
-    }
-
-  if (gamestate == GS_LEVEL)
+  if (gamemapinfo)
   {
-    int epsd, map;
+    const char *next = NULL;
+
+    if (gamemapinfo->nextsecret[0])
+      next = gamemapinfo->nextsecret;
+    else if (gamemapinfo->nextmap[0])
+      next = gamemapinfo->nextmap;
+
+    if (next)
+      G_ValidateMapName(next, &epsd, &map);
+  }
+  else
+  {
+    // secret level
+    doom2_next[14] = (W_CheckNumForName("map31") >= 0) ? 31 : 16;
+
+    if (gamemission == pack_hacx)
+    {
+      doom2_next[30] = 16;
+      doom2_next[20] = 1;
+    }
+
+    // shareware doom has only episode 1
+    doom_next[0][7] = (gamemode == shareware ? -1 : 21);
+
+    doom_next[2][7] = (gamemode == registered ? -1 : 41);
+
+    if (gameversion == exe_chex)
+    {
+      doom_next[0][2] = 14;
+      doom_next[0][4] = 11;
+    }
+
+    //doom2_next and doom_next are 0 based, unlike gameepisode and gamemap
+    epsd = gameepisode - 1;
+    map = gamemap - 1;
 
     if (gamemode == commercial)
     {
-      epsd = gameepisode;
-      map = doom2_next[gamemap-1];
+      epsd = 1;
+      if (map >= 0 && map <= 31)
+        map = doom2_next[map];
+      else
+        map = gamemap + 1;
     }
     else
     {
-      epsd = doom_next[gameepisode-1][gamemap-1] / 10;
-      map = doom_next[gameepisode-1][gamemap-1] % 10;
+      if (epsd >= 0 && epsd <= 3 && map >= 0 && map <= 8)
+      {
+        int next = doom_next[epsd][map];
+        epsd = next / 10;
+        map = next % 10;
+      }
+      else
+      {
+        epsd = gameepisode;
+        map = gamemap + 1;
+      }
     }
-
-    G_DeferedInitNew(gameskill, epsd, map);
-    changed = true;
   }
 
-  return changed;
+  if ((gamestate == GS_LEVEL) &&
+            !deathmatch && !netgame &&
+            !demorecording && !demoplayback &&
+            !menuactive)
+  {
+    char *name = G_MapName(epsd, map);
+
+    if (map == -1 || W_CheckNumForName(name) == -1)
+    {
+      char buf[1024];
+      name = G_MapName(gameepisode, gamemap);
+      M_snprintf(buf, 1024, "Next level not found for %s", name);
+      players[displayplayer].message = buf;
+    }
+    else
+    {
+      G_DeferedInitNew(gameskill, epsd, map);
+      return true;
+    }
+  }
+
+  return false;
 }
 
 //

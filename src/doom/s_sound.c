@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "g_umapinfo.h"
 #include "i_sound.h"
 #include "i_system.h"
 
@@ -385,6 +386,18 @@ void S_Start(void)
     // start new music for the level
     if (musicVolume) // [crispy] do not reset pause state at zero music volume
     mus_paused = 0;
+
+    if (gamemapinfo && gamemapinfo->music[0])
+    {
+        int muslump = W_CheckNumForName(gamemapinfo->music);
+        if (muslump >= 0)
+        {
+            S_ChangeMusInfoMusic(muslump, true);
+            return;
+        }
+        // If the mapinfo defined music cannot be found, try the default for the
+        // given map.
+    }
 
     if (gamemode == commercial)
     {
