@@ -542,9 +542,9 @@ static int ST_cheat_spechits()
 	        continue;
 	    }
 
-	    P_CrossSpecialLine(i, 0, plyr->mo);
+	    P_CrossSpecialLine(i, 0, plyr->mo, false);
 	    P_ShootSpecialLine(plyr->mo, &lines[i]);
-	    P_UseSpecialLine(plyr->mo, &lines[i], 0);
+	    P_UseSpecialLine(plyr->mo, &lines[i], 0, false);
 
 	    speciallines++;
 	}
