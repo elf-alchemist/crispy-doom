@@ -96,8 +96,6 @@ typedef struct
 	boolean flashinghom;
 	boolean fliplevels;
 	boolean flipweapons;
-	boolean havee1m10;
-	boolean havemap33;
 	boolean havessg;
 	boolean singleplayer;
 	boolean stretchsky;

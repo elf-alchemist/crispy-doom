@@ -468,51 +468,6 @@ void HU_Stop(void)
     headsupactive = false;
 }
 
-// [crispy] display names of single special levels in Automap
-// These are single, non-consecutive, (semi-)official levels
-// without their own music or par times and thus do not need
-// to be handled as distinct pack_* game missions.
-typedef struct
-{
-    GameMission_t mission;
-    int episode;
-    int map;
-    const char *wad;
-    const char *name;
-} speciallevel_t;
-
-static const speciallevel_t speciallevels[] = {
-    // [crispy] ExM0
-    {doom, 1, 0, NULL, NULL},
-    {doom, 2, 0, NULL, NULL},
-    {doom, 3, 0, NULL, NULL},
-    {doom, 4, 0, NULL, NULL},
-    // [crispy] Romero's latest E1 additions
-    {doom, 1, 8, "e1m8b.wad", HUSTR_E1M8B},
-    {doom, 1, 4, "e1m4b.wad", HUSTR_E1M4B},
-    // [crispy] E1M10 "Sewers" (Xbox Doom)
-    {doom, 1, 10, NULL, HUSTR_E1M10},
-};
-
-static void HU_SetSpecialLevelName (const char *wad, const char **name)
-{
-    int i;
-
-    for (i = 0; i < arrlen(speciallevels); i++)
-    {
-	const speciallevel_t speciallevel = speciallevels[i];
-
-	if (logical_gamemission == speciallevel.mission &&
-	    (!speciallevel.episode || gameepisode == speciallevel.episode) &&
-	    gamemap == speciallevel.map &&
-	    (!speciallevel.wad || !strcasecmp(wad, speciallevel.wad)))
-	{
-	    *name = speciallevel.name ? speciallevel.name : maplumpinfo->name;
-	    break;
-	}
-    }
-}
-
 static int hu_widescreendelta;
 
 void HU_Start(void)
@@ -631,9 +586,6 @@ void HU_Start(void)
     {
         s = HU_TITLE_CHEX;
     }
-
-    // [crispy] display names of single special levels in Automap
-    HU_SetSpecialLevelName(W_WadNameForLump(maplumpinfo), &s);
 
     // [crispy] explicitely display (episode and) map if the
     // map is from a PWAD or if the map title string has been dehacked

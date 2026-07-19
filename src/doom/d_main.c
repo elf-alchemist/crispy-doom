@@ -2107,22 +2107,6 @@ void D_DoomMain (void)
         )
     );
 
-    // [crispy] check for presence of E1M10
-    crispy->havee1m10 = (gamemode == retail) &&
-                       (W_CheckNumForName("e1m10") != -1) &&
-                       (W_CheckNumForName("sewers") != -1);
-
-    // [crispy] check for presence of MAP33
-    crispy->havemap33 = (gamemode == commercial) &&
-                       (W_CheckNumForName("map33") != -1) &&
-                       (W_CheckNumForName("cwilv32") != -1);
-
-    // [crispy] change level name for MAP33 if not already changed
-    if (crispy->havemap33 && !DEH_HasStringReplacement(PHUSTR_1))
-    {
-        DEH_AddStringReplacement(PHUSTR_1, "level 33: betray");
-    }
-
     printf ("NET_Init: Init network subsystem.\n");
     NET_Init ();
 
@@ -2325,6 +2309,9 @@ void D_DoomMain (void)
 
     DEH_printf("ST_Init: Init status bar.\n");
     ST_Init ();
+
+    // [crispy] UMAPINFO
+    MN_SetHUFontKerning();
 
     // If Doom II without a MAP01 lump, this is a store demo.
     // Moved this here so that MAP01 isn't constantly looked up

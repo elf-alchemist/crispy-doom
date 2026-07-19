@@ -25,6 +25,5 @@ extern int bex_pars[7][10];
 extern int bex_cpars[35];
 
 extern boolean bex_partimes;      // in wi_stuff to allow pars in modified games
-extern boolean umapinfo_partimes; //
 
 #endif /* #ifndef DEH_BEXPARS_H */

@@ -15,7 +15,9 @@
 #ifndef G_UMAPINFO_H
 #define G_UMAPINFO_H
 
+#include "d_mode.h"
 #include "doomtype.h"
+#include "m_misc.h"
 
 typedef enum
 {
@@ -66,14 +68,15 @@ typedef struct mapentry_s
     mapinfo_flags_t flags;
 } mapentry_t;
 
-extern mapentry_t *umapinfo;
-
 extern boolean EpiCustom;
+extern boolean mapinfo_partimes;
+
+void G_ParseMapInfo(int lumpnum, GameMission_t mission, boolean doom_help2);
 
 mapentry_t *G_LookupMapinfo(int episode, int map);
 
 boolean G_ValidateMapName(const char *mapname, int *episode, int *map);
 
-void G_ParseMapInfo(int lumpnum);
+char *G_MapName(int e, int m);
 
 #endif

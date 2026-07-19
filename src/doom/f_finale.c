@@ -439,22 +439,24 @@ void F_Ticker(void)
 
 void F_TextWrite (void)
 {
-    byte*	src;
-    pixel_t*	dest;
-    
     int		w;
     signed int	count;
     const char *ch;
     int		c;
     int		cx;
     int		cy;
-    
-    // erase the entire screen to a tiled background
-    src = W_CacheLumpName ( finaleflat , PU_CACHE);
-    dest = I_VideoBuffer;
-	
-    // [crispy] use unified flat filling function
-    V_FillFlat(0, SCREENHEIGHT, 0, SCREENWIDTH, src, dest);
+
+    // [crispy] UMAPINFO support
+    if (gamemapinfo && W_CheckNumForName(finaleflat) != -1 && R_FlatNumForName(finaleflat) == -1)
+    {
+      V_DrawPatchFullScreen(W_CacheLumpName(finaleflat, PU_LEVEL), false);
+    }
+    else if (R_FlatNumForName(finaleflat) != -1)
+    {
+      byte *src = W_CacheLumpName(finaleflat, PU_LEVEL);
+      pixel_t *dest = I_VideoBuffer;
+      V_FillFlat(0, SCREENHEIGHT, 0, SCREENWIDTH, src, dest);
+    }
 
     V_MarkRect (0, 0, SCREENWIDTH, SCREENHEIGHT);
     

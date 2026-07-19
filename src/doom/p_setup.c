@@ -1182,12 +1182,6 @@ int P_GetNumForMap (int episode, int map, boolean critical)
 	lumpname[4] = 0;
     }
 
-    // [crispy] special-casing for E1M10 "Sewers" support
-    if (crispy->havee1m10 && episode == 1 && map == 10)
-    {
-	DEH_snprintf(lumpname, 9, "E1M10");
-    }
-
     return critical ? W_GetNumForName(lumpname) : W_CheckNumForName(lumpname);
 }
 

@@ -282,16 +282,4 @@ extern	int		rndindex;
 
 extern  ticcmd_t       *netcmds;
 
-char *G_MapName(int e, int m)
-{
-    static char name[9];
-
-    if (gamemode == commercial)
-        M_snprintf(name, sizeof(name), "MAP%02d", m);
-    else
-        M_snprintf(name, sizeof(name), "E%dM%d", e, m);
-
-    return name;
-}
-
 #endif

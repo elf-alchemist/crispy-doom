@@ -161,6 +161,8 @@ static boolean opldev;
 
 extern boolean speedkeydown (void);
 
+#define SPACEWIDTH        4
+
 //
 // MENU TYPEDEFS
 //
@@ -1404,9 +1406,9 @@ void MN_AddEpisode(const char *map, const char *gfx, const char *txt, char key)
         }
     }
 
-    if (EpiDef.numitems == 8)
+    if (EpiDef.numitems == MAX_EPISODES)
     {
-        printf("MN_AddEpisode: UMAPINFO spec limit of 8 episodes exceeded!\n");
+        printf("MN_AddEpisode: UMAPINFO limit of %d episodes exceeded!\n", MAX_EPISODES);
     }
     else if (EpiDef.numitems >= MAX_EPISODES)
     {
@@ -2250,9 +2252,6 @@ static int G_GotoNextLevel(void)
 
     if (gamemode == commercial)
     {
-      if (crispy->havemap33)
-        doom2_next[1] = 33;
-
       if (W_CheckNumForName("map31") < 0)
         doom2_next[14] = 16;
 
@@ -2290,21 +2289,6 @@ static int G_GotoNextLevel(void)
     {
       epsd = doom_next[gameepisode-1][gamemap-1] / 10;
       map = doom_next[gameepisode-1][gamemap-1] % 10;
-    }
-
-    // [crispy] special-casing for E1M10 "Sewers" support
-    if (crispy->havee1m10 && gameepisode == 1)
-    {
-	if (gamemap == 1)
-	{
-	    map = 10;
-	}
-	else
-	if (gamemap == 10)
-	{
-	    epsd = 1;
-	    map = 2;
-	}
     }
 
     G_DeferedInitNew(gameskill, epsd, map);
@@ -3536,4 +3520,134 @@ void M_LoadGameVerMismatch ()
 	M_StartMessage("Game Version Mismatch\n\n"PRESSKEY, NULL, false);
 	messageToPrint = 2;
 	S_StartSoundOptional(NULL, sfx_mnuopn, sfx_swtchn); // [NS] Optional menu sounds.
+}
+
+// [crispy] UMAPINFO support
+
+static int kerning = 0;
+
+//
+// Find string width from hu_font chars
+//
+
+int MN_StringWidth(const char *string)
+{
+    int c, w = 0;
+
+    while (*string)
+    {
+        c = *string++;
+        if (c == '\x1b') // skip code for color change
+        {
+            if (*string)
+            {
+                string++;
+            }
+            continue;
+        }
+        c = M_ToUpper(c) - HU_FONTSTART;
+        if (c < 0 || c >= HU_FONTSIZE || hu_font[c] == NULL)
+        {
+            w += SPACEWIDTH;
+            continue;
+        }
+        w += SHORT(hu_font[c]->width);
+    }
+
+    return w;
+}
+
+void MN_SetHUFontKerning(void)
+{
+    if (MN_StringWidth("abcdefghijklmnopqrstuvwxyz01234") > 230)
+    {
+        kerning = -1;
+    }
+}
+
+// M_GetPixelWidth() returns the number of pixels in the width of
+// the string, NOT the number of chars in the string.
+
+int MN_GetPixelWidth(const char *ch)
+{
+    int len = 0;
+    int c;
+
+    while (*ch)
+    {
+        c = *ch++; // pick up next char
+
+        if (c == '\x1b') // skip color
+        {
+            if (*ch)
+            {
+                ch++;
+            }
+            continue;
+        }
+
+        c = M_ToUpper(c) - HU_FONTSTART;
+        if (c < 0 || c >= HU_FONTSIZE || hu_font[c] == NULL)
+        {
+            len += SPACEWIDTH; // space
+            continue;
+        }
+
+        len += SHORT(hu_font[c]->width);
+        len += kerning; // adjust so everything fits
+    }
+    len -= kerning; // replace what you took away on the last char only
+    return len;
+}
+
+void MN_DrawStringCR(int cx, int cy, byte *xlat, const char *ch)
+{
+    int w;
+    int c;
+
+    byte *xlat_local = xlat;
+
+    while (*ch)
+    {
+        c = *ch++; // get next char
+
+        if (c == '\x1b' && *ch)
+        {
+            c = *ch++;
+            if (c >= '0' && c <= '0' + CR_NONE)
+            {
+                xlat_local = cr[c - '0'];
+            }
+            else if (c == '0' + CR_ORIG)
+            {
+                xlat_local = xlat;
+            }
+            continue;
+        }
+
+        c = M_ToUpper(c) - HU_FONTSTART;
+        if (c < 0 || c >= HU_FONTSIZE || hu_font[c] == NULL)
+        {
+            cx += SPACEWIDTH; // space
+            continue;
+        }
+
+        w = SHORT(hu_font[c]->width);
+        if (cx + w > SCREENWIDTH)
+        {
+            break;
+        }
+
+        dp_translation = xlat_local;
+        V_DrawPatch(cx, cy, hu_font[c]);
+
+        // The screen is cramped, so trim one unit from each
+        // character so they butt up against each other.
+        cx += w + kerning;
+    }
+}
+
+void MN_DrawString(int cx, int cy, int color, const char *ch)
+{
+    MN_DrawStringCR(cx, cy, cr[color], ch);
 }

@@ -19,6 +19,10 @@
 
 #include <stdio.h>
 
+#include "hu_stuff.h"
+#include "g_umapinfo.h"
+#include "m_menu.h"
+#include "v_trans.h"
 #include "z_zone.h"
 
 #include "m_misc.h"
@@ -63,7 +67,8 @@
 //  in one episode. So there.
 #define NUMEPISODES	4
 #define NUMMAPS		9
-
+// # of commercial levels
+#define NUMCMAPS 32
 
 // in tics
 //U #define PAUSELEN		(TICRATE*2) 
@@ -331,9 +336,7 @@ static int		cnt_secret[MAXPLAYERS];
 static int		cnt_time;
 static int		cnt_par;
 static int		cnt_pause;
-
-// # of commercial levels
-static int		NUMCMAPS = 32;
+static int    cnt_total_time;
 
 
 //
@@ -416,6 +419,10 @@ boolean WI_Responder(event_t* ev)
     return false;
 }
 
+static void WI_DrawString(int y, const char* str)
+{
+    MN_DrawString(160 - (MN_GetPixelWidth(str) / 2), y, CR_GRAY, str);
+}
 
 // Draws "<Levelname> Finished!"
 void WI_drawLF(void)
@@ -464,25 +471,54 @@ void WI_drawLF(void)
 // Draws "Entering <LevelName>"
 void WI_drawEL(void)
 {
+    const mapentry_t *mapinfo = wbs->nextmapinfo;
     int y = WI_TITLEY;
-
-    // [crispy] prevent crashes with maps without map title graphics lump
-    if (wbs->next >= num_lnames || lnames[wbs->next] == NULL)
-    {
-        return;
-    }
 
     // draw "Entering"
     V_DrawPatch((ORIGWIDTH - SHORT(entering->width))/2,
 		y,
                 entering);
 
-    // draw level
-    y += (5*SHORT(lnames[wbs->next]->height))/4;
+    // The level defines a new name but no texture for the name
+    if (mapinfo && mapinfo->levelname && !mapinfo->levelpic[0])
+    {
+        y += (5 * SHORT(entering->height)) / 4;
 
-    V_DrawPatch((ORIGWIDTH - SHORT(lnames[wbs->next]->width))/2,
-		y, 
-                lnames[wbs->next]);
+        WI_DrawString(y, mapinfo->levelname);
+
+        if (mapinfo->author)
+        {
+            y += (5 * SHORT(hu_font['A' - HU_FONTSTART]->height) / 4);
+
+            WI_DrawString(y, mapinfo->author);
+        }
+    }
+    else if (mapinfo && mapinfo->levelpic[0])
+    {
+        patch_t *patch = W_CacheLumpName(mapinfo->levelpic, PU_CACHE);
+
+        // If the levelpic graphics lump is not fullscreen,
+        // draw it right below the "entering" graphics lump
+        if (SHORT(patch->height) < SCREENHEIGHT)
+        {
+            y += (5 * SHORT(entering->height)) / 4;
+        }
+
+        V_DrawPatch((SCREENWIDTH - SHORT(patch->width)) / 2, y, patch);
+    }
+    // [FG] prevent crashes for levels without name graphics
+    else if (wbs->next >= 0 && wbs->next < num_lnames && lnames[wbs->next])
+    {
+        // draw level
+        // haleyjd: corrected to use height of entering, not map name
+        if (SHORT(lnames[wbs->next]->height) < SCREENHEIGHT)
+        {
+            y += (5 * SHORT(entering->height)) / 4;
+        }
+
+        V_DrawPatch((SCREENWIDTH - SHORT(lnames[wbs->next]->width)) / 2, y,
+                    lnames[wbs->next]);
+    }
 
 }
 
@@ -852,7 +888,7 @@ void WI_drawShowNextLoc(void)
 	    return;
 	}
 	
-	last = (wbs->last == 8 || wbs->last == 9) ? wbs->next - 1 : wbs->last; // [crispy] support E1M10 "Sewers"
+	last = (wbs->last == 8) ? wbs->next - 1 : wbs->last;
 
 	// draw a splat on taken cities.
 	for (i=0 ; i<=last ; i++)
@@ -861,16 +897,6 @@ void WI_drawShowNextLoc(void)
 	// splat the secret level?
 	if (wbs->didsecret)
 	    WI_drawOnLnode(8, splat);
-
-	// [crispy] the splat for E1M10 "Sewers" is drawn only once,
-	// i.e. now, when returning from the level
-	// (and this is not going to change)
-	if (crispy->havee1m10 && wbs->epsd == 0 && wbs->last == 9)
-	{
-	    wbs->epsd = 1;
-	    WI_drawOnLnode(0, splat);
-	    wbs->epsd = 0;
-	}
 
 	// draw flashing ptr
 	if (snl_pointeron)
@@ -1387,7 +1413,7 @@ void WI_initStats(void)
     acceleratestage = 0;
     sp_state = 1;
     cnt_kills[0] = cnt_items[0] = cnt_secret[0] = -1;
-    cnt_time = cnt_par = -1;
+    cnt_time = cnt_par = cnt_total_time = -1;
     cnt_pause = TICRATE;
 
     WI_initAnimatedBack(true);
@@ -1404,6 +1430,7 @@ void WI_updateStats(void)
 	cnt_kills[0] = (plrs[me].skills * 100) / wbs->maxkills;
 	cnt_items[0] = (plrs[me].sitems * 100) / wbs->maxitems;
 	cnt_secret[0] = (plrs[me].ssecret * 100) / wbs->maxsecret;
+  cnt_total_time = wbs->totaltimes / TICRATE;
 	cnt_time = plrs[me].stime / TICRATE;
 	cnt_par = wbs->partime / TICRATE;
 	S_StartSoundOptional(0, sfx_inttot, sfx_barexp); // [NS] Optional inter sounds.
@@ -1463,6 +1490,11 @@ void WI_updateStats(void)
 	if (cnt_time >= plrs[me].stime / TICRATE)
 	    cnt_time = plrs[me].stime / TICRATE;
 
+  cnt_total_time += 3;
+
+  if (cnt_total_time >= wbs->totaltimes / TICRATE)
+    cnt_total_time = wbs->totaltimes / TICRATE;
+
 	cnt_par += 3;
 
 	if (cnt_par >= wbs->partime / TICRATE)
@@ -1471,8 +1503,14 @@ void WI_updateStats(void)
 
 	    if (cnt_time >= plrs[me].stime / TICRATE)
 	    {
-		S_StartSoundOptional(0, sfx_inttot, sfx_barexp); // [NS] Optional inter sounds.
-		sp_state++;
+					// [crispy]
+	        if ((cnt_time >= plrs[me].stime / TICRATE) &&
+	            (cnt_total_time >= wbs->totaltimes / TICRATE))
+	        {
+							// [NS] Optional inter sounds.
+	            S_StartSoundOptional(0, sfx_inttot, sfx_barexp);
+	            sp_state++;
+	        }
 	    }
 	}
     }
@@ -1504,10 +1542,14 @@ void WI_drawStats(void)
 {
     // line height
     int lh = (3*SHORT(num[0]->height))/2;
-    int maplump = W_CheckNumForName(G_MapName(wbs->epsd + 1, wbs->last + 1));
-    boolean draw_partime;
-    boolean wide_total;
-    boolean wide_time;
+    const int cnt_total_time = (wbs->totaltimes / TICRATE);
+    const int maplump = W_CheckNumForName(G_MapName(wbs->epsd + 1, wbs->last + 1));
+    const boolean draw_partime = (W_IsIWADLump(lumpinfo[maplump]) || bex_partimes || mapinfo_partimes) &&
+                                (wbs->epsd < 3 || mapinfo_partimes);
+    // [FG] choose x-position depending on width of time string
+    const boolean wide_total = (cnt_total_time > 61*59) ||
+                              (SP_TIMEX + SHORT(total->width) >= SCREENWIDTH/4);
+    const boolean wide_time = (wide_total && !draw_partime);
 
     WI_slamBackground();
 
@@ -1524,13 +1566,6 @@ void WI_drawStats(void)
 
     V_DrawPatch(SP_STATSX, SP_STATSY+2*lh, sp_secret);
     WI_drawPercent(ORIGWIDTH - SP_STATSX, SP_STATSY+2*lh, cnt_secret[0]);
-
-    draw_partime = (W_IsIWADLump(lumpinfo[maplump]) || bex_partimes || umapinfo_partimes) &&
-                                (wbs->epsd < 3 || umapinfo_partimes);
-    // [FG] choose x-position depending on width of time string
-    wide_total = (wbs->totaltimes / TICRATE > 61*59) ||
-                              (SP_TIMEX + SHORT(total->width) >= SCREENWIDTH/4);
-    wide_time = (wide_total && !draw_partime);
 
     V_DrawPatch(SP_TIMEX, SP_TIMEY, timepatch);
     // Why add a hardcoded +8 you ask?
@@ -1549,12 +1584,10 @@ void WI_drawStats(void)
     // [crispy] draw total time after level time and par time
     if (sp_state > 8)
     {
-	const int ttime = wbs->totaltimes / TICRATE;
-	const boolean wide = (ttime > 61*59) || (SP_TIMEX + SHORT(total->width) >= ORIGWIDTH/4);
-
 	V_DrawPatch(SP_TIMEX, SP_TIMEY + 16, total);
 	// [crispy] choose x-position depending on width of time string
-	WI_drawTime((wide ? ORIGWIDTH : ORIGWIDTH/2) - SP_TIMEX, SP_TIMEY + 16, ttime, false);
+	WI_drawTime((wide_total ? (SCREENWIDTH - SP_TIMEX) : (SCREENWIDTH/2 + 8)),
+	            SP_TIMEY + 16, cnt_total_time, false);
     }
 
     // [crispy] exit early from the tally screen after ExM8
@@ -1672,12 +1705,6 @@ static void WI_loadUnloadData(load_callback_t callback)
 	{
 	    DEH_snprintf(name, 9, "WILV%d%d", wbs->epsd, i);
             callback(name, &lnames[i]);
-	}
-	// [crispy] special-casing for E1M10 "Sewers" support
-	if (crispy->havee1m10)
-	{
-	    DEH_snprintf(name, 9, "SEWERS");
-	    callback(name, &lnames[i]);
 	}
 
 	// you are here
@@ -1830,18 +1857,15 @@ void WI_loadData(void)
 {
     if (gamemode == commercial)
     {
-	NUMCMAPS = (crispy->havemap33) ? 33 : 32;
+	num_lnames = NUMCMAPS;
 	lnames = (patch_t **) Z_Malloc(sizeof(patch_t*) * NUMCMAPS,
 				       PU_STATIC, NULL);
-	num_lnames = NUMCMAPS;
     }
     else
     {
-	// [crispy] support E1M10 "Sewers"
-	int nummaps = crispy->havee1m10 ? NUMMAPS + 1 : NUMMAPS;
-	lnames = (patch_t **) Z_Malloc(sizeof(patch_t*) * nummaps,
+	num_lnames = NUMMAPS;
+	lnames = (patch_t **) Z_Malloc(sizeof(patch_t*) * NUMMAPS,
 				       PU_STATIC, NULL);
-	num_lnames = nummaps;
     }
 
     WI_loadUnloadData(WI_loadCallback);

@@ -2061,7 +2061,7 @@ void G_DoCompleted (void)
     wminfo.last = gamemap - 1;
     wminfo.lastmapinfo = gamemapinfo;
     wminfo.nextmapinfo = NULL;
-    umapinfo_partimes = false;
+    mapinfo_partimes = false;
 
     if (gamemapinfo)
     {
@@ -2104,7 +2104,7 @@ void G_DoCompleted (void)
         wminfo.didsecret = players[consoleplayer].didsecret;
         wminfo.partime = gamemapinfo->partime * TICRATE;
         if (wminfo.partime > 0)
-          umapinfo_partimes = true;
+          mapinfo_partimes = true;
         goto frommapinfo;	// skip past the default setup.
       }
     }
@@ -2175,18 +2175,12 @@ void G_DoCompleted (void)
     if ( gamemode == commercial)
     {
 	if (secretexit)
-	    if (gamemap == 2 && critical->havemap33)
-	      wminfo.next = 32;
-	    else
 	    switch(gamemap)
 	    {
 	      case 15: wminfo.next = 30; break;
 	      case 31: wminfo.next = 31; break;
 	    }
 	else
-	    if (gamemap == 33 && critical->havemap33)
-	      wminfo.next = 2;
-	    else
 	    switch(gamemap)
 	    {
 	      case 31:
@@ -2198,9 +2192,6 @@ void G_DoCompleted (void)
     {
 	if (secretexit) 
 	{
-	    if (critical->havee1m10 && gameepisode == 1 && gamemap == 1)
-	    wminfo.next = 9; // [crispy] go to secret level E1M10 "Sewers"
-	    else
 	    wminfo.next = 8; 	// go to secret level 
 	}
 	else if (gamemap == 9) 
@@ -2224,9 +2215,6 @@ void G_DoCompleted (void)
 	    }                
 	} 
 	else
-	if (critical->havee1m10 && gameepisode == 1 && gamemap == 10)
-	    wminfo.next = 1; // [crispy] returning from secret level E1M10 "Sewers"
-	else 
 	    wminfo.next = gamemap;          // go to next level 
     }
 		 
@@ -2338,9 +2326,6 @@ void G_WorldDone (void)
     gameaction = ga_worlddone; 
 
     if (secretexit) 
-      // [crispy] special-casing for E1M10 "Sewers" support
-      // i.e. avoid drawing the splat for E1M9 already
-      if (!crispy->havee1m10 || gameepisode != 1 || gamemap != 1)
 	players[consoleplayer].didsecret = true; 
 
     if ( gamemode == commercial )
@@ -2745,11 +2730,7 @@ G_InitNew
     if ( (map > 9)
 	 && ( gamemode != commercial) )
     {
-      // [crispy] support E1M10 "Sewers"
-      if (!crispy->havee1m10 || episode != 1)
       map = 9;
-      else
-      map = 10;
     }
   }
 

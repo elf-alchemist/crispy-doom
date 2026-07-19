@@ -12,24 +12,34 @@
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
 
-#include "g_umapinfo.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "doomstat.h"
+#include "g_umapinfo.h"
+
+#include "d_mode.h"
 #include "doomtype.h"
+#include "i_system.h"
 #include "m_array.h"
-#include "m_menu.h"
 #include "m_misc.h"
 #include "m_scanner.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
-mapentry_t *umapinfo = NULL;
+boolean mapinfo_partimes = false;
 
-static const char *const actor_names[] = {
+static boolean mapinfo_mapxy;
+static mapentry_t *mapinfo = NULL;
+
+static void (*AddEpisode)(const char *map, const char *gfx, const char *txt,
+                          char key);
+static void (*ClearEpisodes)(void);
+
+static const char *const *actor_names = NULL;
+static int actor_names_length = 0;
+
+static const char *const actor_names_doom[250] = {
     "DoomPlayer",
     "ZombieMan",
     "ShotgunGuy",
@@ -167,121 +177,289 @@ static const char *const actor_names[] = {
     "ColonGibs",
     "SmallBloodPool",
     "BrainStem",
-    // Boom/MBF additions
+    // Boom
     "PointPusher",
     "PointPuller",
+    // MBF
     "MBFHelperDog",
+    // MBF beta emulation
     "PlasmaBall1",
     "PlasmaBall2",
     "EvilSceptre",
     "UnholyBible",
+    // Risen3D, later PrBoom+
     "MusicChanger",
+    // Port-exlusive
     "Deh_Actor_145",
     "Deh_Actor_146",
     "Deh_Actor_147",
     "Deh_Actor_148",
     "Deh_Actor_149",
-    // DEHEXTRA Actors start here
-    "Deh_Actor_150", // Extra thing 0
-    "Deh_Actor_151", // Extra thing 1
-    "Deh_Actor_152", // Extra thing 2
-    "Deh_Actor_153", // Extra thing 3
-    "Deh_Actor_154", // Extra thing 4
-    "Deh_Actor_155", // Extra thing 5
-    "Deh_Actor_156", // Extra thing 6
-    "Deh_Actor_157", // Extra thing 7
-    "Deh_Actor_158", // Extra thing 8
-    "Deh_Actor_159", // Extra thing 9
-    "Deh_Actor_160", // Extra thing 10
-    "Deh_Actor_161", // Extra thing 11
-    "Deh_Actor_162", // Extra thing 12
-    "Deh_Actor_163", // Extra thing 13
-    "Deh_Actor_164", // Extra thing 14
-    "Deh_Actor_165", // Extra thing 15
-    "Deh_Actor_166", // Extra thing 16
-    "Deh_Actor_167", // Extra thing 17
-    "Deh_Actor_168", // Extra thing 18
-    "Deh_Actor_169", // Extra thing 19
-    "Deh_Actor_170", // Extra thing 20
-    "Deh_Actor_171", // Extra thing 21
-    "Deh_Actor_172", // Extra thing 22
-    "Deh_Actor_173", // Extra thing 23
-    "Deh_Actor_174", // Extra thing 24
-    "Deh_Actor_175", // Extra thing 25
-    "Deh_Actor_176", // Extra thing 26
-    "Deh_Actor_177", // Extra thing 27
-    "Deh_Actor_178", // Extra thing 28
-    "Deh_Actor_179", // Extra thing 29
-    "Deh_Actor_180", // Extra thing 30
-    "Deh_Actor_181", // Extra thing 31
-    "Deh_Actor_182", // Extra thing 32
-    "Deh_Actor_183", // Extra thing 33
-    "Deh_Actor_184", // Extra thing 34
-    "Deh_Actor_185", // Extra thing 35
-    "Deh_Actor_186", // Extra thing 36
-    "Deh_Actor_187", // Extra thing 37
-    "Deh_Actor_188", // Extra thing 38
-    "Deh_Actor_189", // Extra thing 39
-    "Deh_Actor_190", // Extra thing 40
-    "Deh_Actor_191", // Extra thing 41
-    "Deh_Actor_192", // Extra thing 42
-    "Deh_Actor_193", // Extra thing 43
-    "Deh_Actor_194", // Extra thing 44
-    "Deh_Actor_195", // Extra thing 45
-    "Deh_Actor_196", // Extra thing 46
-    "Deh_Actor_197", // Extra thing 47
-    "Deh_Actor_198", // Extra thing 48
-    "Deh_Actor_199", // Extra thing 49
-    "Deh_Actor_200", // Extra thing 50
-    "Deh_Actor_201", // Extra thing 51
-    "Deh_Actor_202", // Extra thing 52
-    "Deh_Actor_203", // Extra thing 53
-    "Deh_Actor_204", // Extra thing 54
-    "Deh_Actor_205", // Extra thing 55
-    "Deh_Actor_206", // Extra thing 56
-    "Deh_Actor_207", // Extra thing 57
-    "Deh_Actor_208", // Extra thing 58
-    "Deh_Actor_209", // Extra thing 59
-    "Deh_Actor_210", // Extra thing 60
-    "Deh_Actor_211", // Extra thing 61
-    "Deh_Actor_212", // Extra thing 62
-    "Deh_Actor_213", // Extra thing 63
-    "Deh_Actor_214", // Extra thing 64
-    "Deh_Actor_215", // Extra thing 65
-    "Deh_Actor_216", // Extra thing 66
-    "Deh_Actor_217", // Extra thing 67
-    "Deh_Actor_218", // Extra thing 68
-    "Deh_Actor_219", // Extra thing 69
-    "Deh_Actor_220", // Extra thing 70
-    "Deh_Actor_221", // Extra thing 71
-    "Deh_Actor_222", // Extra thing 72
-    "Deh_Actor_223", // Extra thing 73
-    "Deh_Actor_224", // Extra thing 74
-    "Deh_Actor_225", // Extra thing 75
-    "Deh_Actor_226", // Extra thing 76
-    "Deh_Actor_227", // Extra thing 77
-    "Deh_Actor_228", // Extra thing 78
-    "Deh_Actor_229", // Extra thing 79
-    "Deh_Actor_230", // Extra thing 80
-    "Deh_Actor_231", // Extra thing 81
-    "Deh_Actor_232", // Extra thing 82
-    "Deh_Actor_233", // Extra thing 83
-    "Deh_Actor_234", // Extra thing 84
-    "Deh_Actor_235", // Extra thing 85
-    "Deh_Actor_236", // Extra thing 86
-    "Deh_Actor_237", // Extra thing 87
-    "Deh_Actor_238", // Extra thing 88
-    "Deh_Actor_239", // Extra thing 89
-    "Deh_Actor_240", // Extra thing 90
-    "Deh_Actor_241", // Extra thing 91
-    "Deh_Actor_242", // Extra thing 92
-    "Deh_Actor_243", // Extra thing 93
-    "Deh_Actor_244", // Extra thing 94
-    "Deh_Actor_245", // Extra thing 95
-    "Deh_Actor_246", // Extra thing 96
-    "Deh_Actor_247", // Extra thing 97
-    "Deh_Actor_248", // Extra thing 98
-    "Deh_Actor_249", // Extra thing 99
+    // DEHEXTRA
+    "Deh_Actor_150",
+    "Deh_Actor_151",
+    "Deh_Actor_152",
+    "Deh_Actor_153",
+    "Deh_Actor_154",
+    "Deh_Actor_155",
+    "Deh_Actor_156",
+    "Deh_Actor_157",
+    "Deh_Actor_158",
+    "Deh_Actor_159",
+    "Deh_Actor_160",
+    "Deh_Actor_161",
+    "Deh_Actor_162",
+    "Deh_Actor_163",
+    "Deh_Actor_164",
+    "Deh_Actor_165",
+    "Deh_Actor_166",
+    "Deh_Actor_167",
+    "Deh_Actor_168",
+    "Deh_Actor_169",
+    "Deh_Actor_170",
+    "Deh_Actor_171",
+    "Deh_Actor_172",
+    "Deh_Actor_173",
+    "Deh_Actor_174",
+    "Deh_Actor_175",
+    "Deh_Actor_176",
+    "Deh_Actor_177",
+    "Deh_Actor_178",
+    "Deh_Actor_179",
+    "Deh_Actor_180",
+    "Deh_Actor_181",
+    "Deh_Actor_182",
+    "Deh_Actor_183",
+    "Deh_Actor_184",
+    "Deh_Actor_185",
+    "Deh_Actor_186",
+    "Deh_Actor_187",
+    "Deh_Actor_188",
+    "Deh_Actor_189",
+    "Deh_Actor_190",
+    "Deh_Actor_191",
+    "Deh_Actor_192",
+    "Deh_Actor_193",
+    "Deh_Actor_194",
+    "Deh_Actor_195",
+    "Deh_Actor_196",
+    "Deh_Actor_197",
+    "Deh_Actor_198",
+    "Deh_Actor_199",
+    "Deh_Actor_200",
+    "Deh_Actor_201",
+    "Deh_Actor_202",
+    "Deh_Actor_203",
+    "Deh_Actor_204",
+    "Deh_Actor_205",
+    "Deh_Actor_206",
+    "Deh_Actor_207",
+    "Deh_Actor_208",
+    "Deh_Actor_209",
+    "Deh_Actor_210",
+    "Deh_Actor_211",
+    "Deh_Actor_212",
+    "Deh_Actor_213",
+    "Deh_Actor_214",
+    "Deh_Actor_215",
+    "Deh_Actor_216",
+    "Deh_Actor_217",
+    "Deh_Actor_218",
+    "Deh_Actor_219",
+    "Deh_Actor_220",
+    "Deh_Actor_221",
+    "Deh_Actor_222",
+    "Deh_Actor_223",
+    "Deh_Actor_224",
+    "Deh_Actor_225",
+    "Deh_Actor_226",
+    "Deh_Actor_227",
+    "Deh_Actor_228",
+    "Deh_Actor_229",
+    "Deh_Actor_230",
+    "Deh_Actor_231",
+    "Deh_Actor_232",
+    "Deh_Actor_233",
+    "Deh_Actor_234",
+    "Deh_Actor_235",
+    "Deh_Actor_236",
+    "Deh_Actor_237",
+    "Deh_Actor_238",
+    "Deh_Actor_239",
+    "Deh_Actor_240",
+    "Deh_Actor_241",
+    "Deh_Actor_242",
+    "Deh_Actor_243",
+    "Deh_Actor_244",
+    "Deh_Actor_245",
+    "Deh_Actor_246",
+    "Deh_Actor_247",
+    "Deh_Actor_248",
+    "Deh_Actor_249",
+};
+
+static const char *const actor_names_heretic[161] = {
+    "CrystalVial",
+    "SilverShield",
+    "EnchantedShield",
+    "BagOfHolding",
+    "SuperMap",
+    "ArtiInvisibility",
+    "ArtiHealth",
+    "ArtiFly",
+    "ArtiInvulnerability",
+    "ArtiTomeOfPower",
+    "ArtiEgg",
+    "EggFX",
+    "ArtiSuperHealth",
+    "ArtiTorch",
+    "ArtiTimeBomb",
+    "ActivatedTimeBomb",
+    "ArtiTeleport",
+    "Pod",
+    "PodGoo",
+    "PodGenerator",
+    "WaterSplash",
+    "WaterSplashBase",
+    "LavaSplash",
+    "LavaSmoke",
+    "SludgeChunk",
+    "SludgeSplash",
+    "SkullHang70",
+    "SkullHang60",
+    "SkullHang45",
+    "SkullHang35",
+    "Chandelier",
+    "SerpentTorch",
+    "SmallPillar",
+    "StalagmiteSmall",
+    "StalagmiteLarge",
+    "StalactiteSmall",
+    "StalactiteLarge",
+    "FireBrazier",
+    "Barrel",
+    "BrownPillar",
+    "Moss1",
+    "Moss2",
+    "WallTorch",
+    "HangingCorpse",
+    "KeyGizmoBlue",
+    "KeyGizmoGreen",
+    "KeyGizmoYellow",
+    "KeyGizmoFloat",
+    "Volcano",
+    "VolcanoBlast",
+    "VolcanoTBlast",
+    "TeleGlitterGenerator1",
+    "TeleGlitterGenerator2",
+    "TeleGlitter1",
+    "TeleGlitter2",
+    "TeleportFog",
+    "TeleportDest",
+    "StaffPuff",
+    "StaffPuff2",
+    "BeakPuff",
+    "Gauntlets",
+    "GauntletPuff1",
+    "GauntletPuff2",
+    "Blaster",
+    "BlasterFX1",
+    "BlasterSmoke",
+    "Ripper",
+    "BlasterPuff1",
+    "BlasterPuff2",
+    "MaceSpawner",
+    "MaceFX1",
+    "MaceFX2",
+    "MaceFX3",
+    "MaceFX4",
+    "SkullRod",
+    "HornRodFX1",
+    "HornRodFX2",
+    "RainPillar1",
+    "RainPillar2",
+    "RainPillar3",
+    "RainPillar4",
+    "GoldWandFX1",
+    "GoldWandFX2",
+    "GoldWandPuff1",
+    "GoldWandPuff2",
+    "PhoenixRod",
+    "PhoenixFX1",
+    "PhoenixFXUnknown",
+    "PhoenixPuff",
+    "PhoenixFX2",
+    "Crossbow",
+    "CrossbowFX1",
+    "CrossbowFX2",
+    "CrossbowFX3",
+    "CrossbowFX4",
+    "Blood",
+    "BloodSplatter",
+    "HereticPlayer",
+    "BloodySkull",
+    "ChickenPlayer",
+    "Chicken",
+    "Feather",
+    "Mummy",
+    "MummyLeader",
+    "MummyGhost",
+    "MummyLeaderGhost",
+    "MummySoul",
+    "MummyFX1",
+    "Beast",
+    "BeastBall",
+    "BurnBall",
+    "BurnBallFB",
+    "Puffy",
+    "Snake",
+    "SnakeProjA",
+    "SnakeProjB",
+    "Ironlich",
+    "HeadFX1",
+    "HeadFX2",
+    "HeadFX3",
+    "Whirlwind",
+    "Clink",
+    "Wizard",
+    "WizardFX1",
+    "HereticImp",
+    "HereticImpLeader",
+    "HereticImpChunk1",
+    "HereticImpChunk2",
+    "HereticImpBall",
+    "Knight",
+    "KnightGhost",
+    "KnightAxe",
+    "RedAxe",
+    "Sorcerer1",
+    "SorcererFX1",
+    "Sorcerer2",
+    "Sorcerer2FX1",
+    "Sorcerer2FXSpark",
+    "Sorcerer2FX2",
+    "Sorcerer2Telefade",
+    "Minotaur",
+    "MinotaurFX1",
+    "MinotaurFX2",
+    "MinotaurFX3",
+    "KeyGreen",
+    "KeyBlue",
+    "KeyYellow",
+    "GoldWandAmmo",
+    "GoldWandHefty",
+    "MaceAmmo",
+    "MaceHefty",
+    "CrossbowAmmo",
+    "CrossbowHefty",
+    "SkullRodAmmo",
+    "SkullRodHefty",
+    "PhoenixRodAmmo",
+    "PhoenixRodHefty",
+    "BlasterAmmo",
+    "BlasterHefty",
+    "SoundWind",
+    "SoundWaterfall",
 };
 
 static void ReplaceString(char **to, const char *from)
@@ -405,7 +583,7 @@ static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
         {
             if (!strcasecmp(SCN_GetString(s), "clear"))
             {
-                MN_ClearEpisodes();
+                ClearEpisodes();
             }
             else
             {
@@ -432,7 +610,7 @@ static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
                 }
             }
 
-            MN_AddEpisode(mape->mapname, lumpname, alttext, key);
+            AddEpisode(mape->mapname, lumpname, alttext, key);
 
             if (alttext)
             {
@@ -603,17 +781,17 @@ static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
         {
             int type, special, tag;
             mape->flags &= ~MapInfo_BossActionClear;
-            for (type = 0; type < arrlen(actor_names); ++type)
+            for (type = 0; type < actor_names_length; ++type)
             {
                 if (!strcasecmp(SCN_GetString(s), actor_names[type]))
                 {
                     break;
                 }
             }
-            if (type == arrlen(actor_names))
+            if (type == actor_names_length)
             {
                 SCN_Error(s, "bossaction: unknown thing type '%s'",
-                         SCN_GetString(s));
+                          SCN_GetString(s));
             }
             SCN_MustGetToken(s, ',');
             SCN_MustGetToken(s, TK_IntConst);
@@ -665,10 +843,26 @@ static void ParseMapEntry(scanner_t *s, mapentry_t *entry)
     }
 }
 
-void G_ParseMapInfo(int lumpnum)
+void G_ParseMapInfo(int lumpnum, GameMission_t mission, boolean doom_help2)
 {
     scanner_t *s = SCN_Open("UMAPINFO", W_CacheLumpNum(lumpnum, PU_CACHE),
-                           W_LumpLength(lumpnum));
+                            W_LumpLength(lumpnum));
+
+    if (mission >= doom && mission <= pack_hacx)
+    {
+        actor_names = actor_names_doom;
+        actor_names_length = arrlen(actor_names_doom);
+    }
+    else if (mission == heretic)
+    {
+        actor_names = actor_names_heretic;
+        actor_names_length = arrlen(actor_names_heretic);
+    }
+    else
+    {
+        I_Error("G_ParseMapInfo: unsupported gamemission: %d", mission);
+    }
+
     while (SCN_TokensLeft(s))
     {
         mapentry_t parsed = {0};
@@ -691,8 +885,7 @@ void G_ParseMapInfo(int lumpnum)
             else if (!strcasecmp(parsed.mapname, "E1M8"))
             {
                 parsed.flags |= MapInfo_EndGameArt;
-                M_CopyLumpName(parsed.endpic,
-                               gamemode == retail ? "CREDIT" : "HELP2");
+                M_CopyLumpName(parsed.endpic, doom_help2 ? "HELP2" : "CREDIT");
             }
             else if (!strcasecmp(parsed.mapname, "E2M8"))
             {
@@ -719,19 +912,19 @@ void G_ParseMapInfo(int lumpnum)
         }
 
         // Does this entry already exist? If yes, replace it.
-        for (i = 0; i < array_size(umapinfo); ++i)
+        for (i = 0; i < array_size(mapinfo); ++i)
         {
-            if (!strcmp(parsed.mapname, umapinfo[i].mapname))
+            if (!strcmp(parsed.mapname, mapinfo[i].mapname))
             {
-                FreeMapEntry(&umapinfo[i]);
-                umapinfo[i] = parsed;
+                FreeMapEntry(&mapinfo[i]);
+                mapinfo[i] = parsed;
                 break;
             }
         }
         // Not found so create a new one.
-        if (i == array_size(umapinfo))
+        if (i == array_size(mapinfo))
         {
-            array_push(umapinfo, parsed);
+            array_push(mapinfo, parsed);
         }
     }
 
@@ -744,7 +937,7 @@ mapentry_t *G_LookupMapinfo(int episode, int map)
     char lumpname[9] = {0};
     M_StringCopy(lumpname, G_MapName(episode, map), sizeof(lumpname));
 
-    array_foreach(entry, umapinfo)
+    array_foreach(entry, mapinfo)
     {
         if (!strcasecmp(lumpname, entry->mapname))
         {
@@ -772,7 +965,7 @@ boolean G_ValidateMapName(const char *mapname, int *episode, int *map)
     mapuname[8] = 0;
     M_ForceUppercase(mapuname);
 
-    if (gamemode != commercial)
+    if (!mapinfo_mapxy)
     {
         if (sscanf(mapuname, "E%dM%d", &e, &m) != 2)
         {
@@ -799,4 +992,16 @@ boolean G_ValidateMapName(const char *mapname, int *episode, int *map)
     }
 
     return strcmp(mapuname, lumpname) == 0;
+}
+
+char *G_MapName(int e, int m)
+{
+    static char name[9];
+
+    if (mapinfo_mapxy)
+        M_snprintf(name, sizeof(name), "MAP%02d", m);
+    else
+        M_snprintf(name, sizeof(name), "E%dM%d", e, m);
+
+    return name;
 }
