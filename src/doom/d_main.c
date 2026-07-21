@@ -27,11 +27,13 @@
 #include <time.h> // [crispy] time_t, time(), struct tm, localtime()
 
 #include "config.h"
+#include "d_mode.h"
 #include "deh_main.h"
 #include "doomdef.h"
 #include "doomstat.h"
 
 #include "dstrings.h"
+#include "g_umapinfo.h"
 #include "sounds.h"
 
 #include "d_iwad.h"
@@ -1434,6 +1436,11 @@ static void G_CheckDemoStatusAtExit (void)
 
 static const char *const loadparms[] = {"-file", "-merge", NULL};
 
+static void LoadMapInfo(int lumpnum)
+{
+    G_ParseMapInfo(lumpnum, gamemission, gamemode);
+}
+
 //
 // D_DoomMain
 //
@@ -1809,6 +1816,20 @@ void D_DoomMain (void)
 
     // Load PWAD files.
     modifiedgame = W_ParseCommandLine();
+
+    // [crispy]
+    mapinfo_mapxy = (gamemode == commercial);
+
+    //!
+    // @category mod
+    //
+    // Disable UMAPINFO loading.
+    //
+
+    if (!M_ParmExists("-nomapinfo"))
+    {
+        W_ProcessInWads("UMAPINFO", LoadMapInfo, PROCESS_IWAD | PROCESS_PWAD);
+    }
 
     //!
     // @arg <file>

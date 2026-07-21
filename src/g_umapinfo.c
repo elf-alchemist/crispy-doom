@@ -28,8 +28,8 @@
 #include "z_zone.h"
 
 boolean mapinfo_partimes = false;
+boolean mapinfo_mapxy = false;
 
-static boolean mapinfo_mapxy;
 static mapentry_t *mapinfo = NULL;
 
 static void (*AddEpisode)(const char *map, const char *gfx, const char *txt,
@@ -843,10 +843,12 @@ static void ParseMapEntry(scanner_t *s, mapentry_t *entry)
     }
 }
 
-void G_ParseMapInfo(int lumpnum, GameMission_t mission, boolean doom_help2)
+void G_ParseMapInfo(int lumpnum, GameMission_t mission, GameMode_t mode)
 {
     scanner_t *s = SCN_Open("UMAPINFO", W_CacheLumpNum(lumpnum, PU_CACHE),
                             W_LumpLength(lumpnum));
+    boolean pwad_help2 =
+        (mode == retail) && W_IsPWADLump(lumpinfo[W_CheckNumForName("HELP2")]);
 
     if (mission >= doom && mission <= pack_hacx)
     {
@@ -885,7 +887,7 @@ void G_ParseMapInfo(int lumpnum, GameMission_t mission, boolean doom_help2)
             else if (!strcasecmp(parsed.mapname, "E1M8"))
             {
                 parsed.flags |= MapInfo_EndGameArt;
-                M_CopyLumpName(parsed.endpic, doom_help2 ? "HELP2" : "CREDIT");
+                M_CopyLumpName(parsed.endpic, pwad_help2 ? "HELP2" : "CREDIT");
             }
             else if (!strcasecmp(parsed.mapname, "E2M8"))
             {

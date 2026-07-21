@@ -1381,7 +1381,7 @@ void M_Episode(int choice)
 // [cirpsy] UMAPINFO support
 //
 
-boolean EpiCustom;
+boolean mapinfo_episodes;
 static short EpiMenuMap[MAX_EPISODES] = {1, 1, 1, 1, -1, -1, -1, -1, -1, -1};
 static short EpiMenuEpi[MAX_EPISODES] = {1, 2, 3, 4, -1, -1, -1, -1, -1, -1};
 
@@ -1395,9 +1395,9 @@ void MN_AddEpisode(const char *map, const char *gfx, const char *txt, char key)
 {
     int epi, mapnum;
 
-    if (!EpiCustom)
+    if (!mapinfo_episodes)
     {
-        EpiCustom = true;
+        mapinfo_episodes = true;
         NewDef.prevMenu = &EpiDef;
 
         if (gamemode == commercial)

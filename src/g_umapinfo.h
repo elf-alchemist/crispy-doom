@@ -68,10 +68,12 @@ typedef struct mapentry_s
     mapinfo_flags_t flags;
 } mapentry_t;
 
-extern boolean EpiCustom;
+extern boolean mapinfo_episodes;
 extern boolean mapinfo_partimes;
+extern boolean mapinfo_mapxy;
+extern boolean mapinfo_finale;
 
-void G_ParseMapInfo(int lumpnum, GameMission_t mission, boolean doom_help2);
+void G_ParseMapInfo(int lumpnum, GameMission_t mission, GameMode_t mode);
 
 mapentry_t *G_LookupMapinfo(int episode, int map);
 

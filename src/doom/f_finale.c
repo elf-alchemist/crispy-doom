@@ -123,7 +123,7 @@ extern void A_RandomJump(void *, void *, void *);
 // UMAPINFO
 //
 
-static boolean mapinfo_finale;
+boolean mapinfo_finale;
 
 static boolean MapInfo_StartFinale(void)
 {

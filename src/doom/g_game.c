@@ -2746,7 +2746,7 @@ G_InitNew
   // [crispy]
   // Disable all sanity checks if there are custom episode definitions.
   // They do not make sense in this case.
-  if (!EpiCustom && P_GetNumForMap(episode, map, false) < 0)
+  if (!mapinfo_episodes && P_GetNumForMap(episode, map, false) < 0)
   {
     if (gameversion >= exe_ultimate)
     {
