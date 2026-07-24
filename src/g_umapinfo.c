@@ -32,10 +32,6 @@ boolean mapinfo_mapxy = false;
 
 static mapentry_t *mapinfo = NULL;
 
-static void (*AddEpisode)(const char *map, const char *gfx, const char *txt,
-                          char key);
-static void (*ClearEpisodes)(void);
-
 static const char *const *actor_names = NULL;
 static int actor_names_length = 0;
 
@@ -514,7 +510,7 @@ static char *ParseMultiString(scanner_t *s)
         else
         {
             char *tmp = build;
-            build = M_StringJoin(tmp, "\n", SCN_GetString(s));
+            build = M_StringJoin(tmp, "\n", SCN_GetString(s), NULL);
             free(tmp);
         }
     } while (SCN_CheckToken(s, ','));
@@ -540,7 +536,9 @@ static void ParseLumpName(scanner_t *s, char *buffer)
 // These do not get stored in the property list
 // but in dedicated struct member variables.
 
-static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
+static void ParseStandardProperty(scanner_t *s, mapentry_t *mape,
+                                  AddEpisodeFunc AddEpisode,
+                                  ClearEpisodeFunc ClearEpisodes)
 {
     char *prop;
     SCN_MustGetToken(s, TK_Identifier);
@@ -610,7 +608,7 @@ static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
                 }
             }
 
-            AddEpisode(mape->mapname, lumpname, alttext, key);
+            AddEpisode(mape->lumpname, lumpname, alttext, key);
 
             if (alttext)
             {
@@ -821,7 +819,8 @@ static void ParseStandardProperty(scanner_t *s, mapentry_t *mape)
     free(prop);
 }
 
-static void ParseMapEntry(scanner_t *s, mapentry_t *entry)
+static void ParseMapEntry(scanner_t *s, mapentry_t *entry, AddEpisodeFunc add,
+                          ClearEpisodeFunc clear)
 {
     SCN_MustGetToken(s, TK_Identifier);
     if (strcasecmp(SCN_GetString(s), "map"))
@@ -834,16 +833,17 @@ static void ParseMapEntry(scanner_t *s, mapentry_t *entry)
     {
         SCN_Error(s, "Invalid map name %s", SCN_GetString(s));
     }
-    ReplaceString(&entry->mapname, SCN_GetString(s));
+    ReplaceString(&entry->lumpname, SCN_GetString(s));
 
     SCN_MustGetToken(s, '{');
     while (!SCN_CheckToken(s, '}'))
     {
-        ParseStandardProperty(s, entry);
+        ParseStandardProperty(s, entry, add, clear);
     }
 }
 
-void G_ParseMapInfo(int lumpnum, GameMission_t mission, GameMode_t mode)
+void G_ParseMapInfo(int lumpnum, GameMission_t mission, GameMode_t mode,
+                    AddEpisodeFunc add, ClearEpisodeFunc clear)
 {
     scanner_t *s = SCN_Open("UMAPINFO", W_CacheLumpNum(lumpnum, PU_CACHE),
                             W_LumpLength(lumpnum));
@@ -869,7 +869,7 @@ void G_ParseMapInfo(int lumpnum, GameMission_t mission, GameMode_t mode)
     {
         mapentry_t parsed = {0};
         int i;
-        ParseMapEntry(s, &parsed);
+        ParseMapEntry(s, &parsed, add, clear);
 
         // Set default level progression here to simplify the checks elsewhere.
         // Doing this lets us skip all normal code for this if nothing has been
@@ -880,25 +880,25 @@ void G_ParseMapInfo(int lumpnum, GameMission_t mission, GameMode_t mode)
         }
         else if (!parsed.nextmap[0] && !(parsed.flags & MapInfo_EndGameClear))
         {
-            if (!strcasecmp(parsed.mapname, "MAP30"))
+            if (!strcasecmp(parsed.lumpname, "MAP30"))
             {
                 parsed.flags |= MapInfo_EndGameCast;
             }
-            else if (!strcasecmp(parsed.mapname, "E1M8"))
+            else if (!strcasecmp(parsed.lumpname, "E1M8"))
             {
                 parsed.flags |= MapInfo_EndGameArt;
                 M_CopyLumpName(parsed.endpic, pwad_help2 ? "HELP2" : "CREDIT");
             }
-            else if (!strcasecmp(parsed.mapname, "E2M8"))
+            else if (!strcasecmp(parsed.lumpname, "E2M8"))
             {
                 parsed.flags |= MapInfo_EndGameArt;
                 M_CopyLumpName(parsed.endpic, "VICTORY2");
             }
-            else if (!strcasecmp(parsed.mapname, "E3M8"))
+            else if (!strcasecmp(parsed.lumpname, "E3M8"))
             {
                 parsed.flags |= MapInfo_EndGameBunny;
             }
-            else if (!strcasecmp(parsed.mapname, "E4M8"))
+            else if (!strcasecmp(parsed.lumpname, "E4M8"))
             {
                 parsed.flags |= MapInfo_EndGameArt;
                 M_CopyLumpName(parsed.endpic, "ENDPIC");
@@ -906,7 +906,7 @@ void G_ParseMapInfo(int lumpnum, GameMission_t mission, GameMode_t mode)
             else
             {
                 int ep, map;
-                if (G_ValidateMapName(parsed.mapname, &ep, &map))
+                if (G_ValidateMapName(parsed.lumpname, &ep, &map))
                 {
                     M_CopyLumpName(parsed.nextmap, G_MapName(ep, map + 1));
                 }
@@ -916,7 +916,7 @@ void G_ParseMapInfo(int lumpnum, GameMission_t mission, GameMode_t mode)
         // Does this entry already exist? If yes, replace it.
         for (i = 0; i < array_size(mapinfo); ++i)
         {
-            if (!strcmp(parsed.mapname, mapinfo[i].mapname))
+            if (!strcmp(parsed.lumpname, mapinfo[i].lumpname))
             {
                 FreeMapEntry(&mapinfo[i]);
                 mapinfo[i] = parsed;
@@ -941,11 +941,18 @@ mapentry_t *G_LookupMapinfo(int episode, int map)
 
     array_foreach(entry, mapinfo)
     {
-        if (!strcasecmp(lumpname, entry->mapname))
+        if (!strcasecmp(lumpname, entry->lumpname))
         {
             return entry;
         }
     }
+
+    printf("Did not find mapinfo definition for level %s\n", lumpname);
+    printf("Did not find mapinfo definition for level %s\n", lumpname);
+    printf("Did not find mapinfo definition for level %s\n", lumpname);
+    printf("Did not find mapinfo definition for level %s\n", lumpname);
+    printf("Did not find mapinfo definition for level %s\n", lumpname);
+    printf("Did not find mapinfo definition for level %s\n", lumpname);
 
     return NULL;
 }

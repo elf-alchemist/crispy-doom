@@ -17,7 +17,6 @@
 
 #include "d_mode.h"
 #include "doomtype.h"
-#include "m_misc.h"
 
 typedef enum
 {
@@ -27,8 +26,8 @@ typedef enum
     MapInfo_EndGameStandard = (1u << 3),
     MapInfo_EndGameCast = (1u << 4),
     MapInfo_EndGameBunny = (1u << 5),
-    MapInfo_EndGame = (MapInfo_EndGameArt | MapInfo_EndGameStandard
-                       | MapInfo_EndGameCast | MapInfo_EndGameBunny),
+    MapInfo_EndGame = (MapInfo_EndGameArt | MapInfo_EndGameStandard |
+                       MapInfo_EndGameCast | MapInfo_EndGameBunny),
     MapInfo_EndGameClear = (1u << 6),
 
     MapInfo_NoIntermission = (1u << 7),
@@ -47,7 +46,7 @@ typedef struct
 
 typedef struct mapentry_s
 {
-    char *mapname;
+    char *lumpname;
     char *levelname;
     char *label;
     char *intertext;
@@ -73,7 +72,11 @@ extern boolean mapinfo_partimes;
 extern boolean mapinfo_mapxy;
 extern boolean mapinfo_finale;
 
-void G_ParseMapInfo(int lumpnum, GameMission_t mission, GameMode_t mode);
+typedef void AddEpisodeFunc(const char *, const char *, const char *, char);
+typedef void ClearEpisodeFunc(void);
+
+void G_ParseMapInfo(int lumpnum, GameMission_t mission, GameMode_t mode,
+                    AddEpisodeFunc add, ClearEpisodeFunc clear);
 
 mapentry_t *G_LookupMapinfo(int episode, int map);
 

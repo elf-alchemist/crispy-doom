@@ -1438,7 +1438,7 @@ static const char *const loadparms[] = {"-file", "-merge", NULL};
 
 static void LoadMapInfo(int lumpnum)
 {
-    G_ParseMapInfo(lumpnum, gamemission, gamemode);
+    G_ParseMapInfo(lumpnum, gamemission, gamemode, MN_AddEpisode, MN_ClearEpisodes);
 }
 
 //
@@ -1817,20 +1817,6 @@ void D_DoomMain (void)
     // Load PWAD files.
     modifiedgame = W_ParseCommandLine();
 
-    // [crispy]
-    mapinfo_mapxy = (gamemode == commercial);
-
-    //!
-    // @category mod
-    //
-    // Disable UMAPINFO loading.
-    //
-
-    if (!M_ParmExists("-nomapinfo"))
-    {
-        W_ProcessInWads("UMAPINFO", LoadMapInfo, PROCESS_IWAD | PROCESS_PWAD);
-    }
-
     //!
     // @arg <file>
     // @category mod
@@ -2091,6 +2077,21 @@ void D_DoomMain (void)
 	    for (i = 0;i < 23; i++)
 		if (W_CheckNumForName(name[i])<0)
 		    I_Error(DEH_String("\nThis is not the registered version."));
+    }
+
+
+    // [crispy]
+    mapinfo_mapxy = (gamemode == commercial);
+
+    //!
+    // @category mod
+    //
+    // Disable UMAPINFO loading.
+    //
+
+    if (!M_ParmExists("-nomapinfo"))
+    {
+        W_ProcessInWads("UMAPINFO", LoadMapInfo, PROCESS_IWAD | PROCESS_PWAD);
     }
 
 // [crispy] disable meaningless warning, we always use "-merge" anyway
