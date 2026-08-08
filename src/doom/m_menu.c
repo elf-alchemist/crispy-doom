@@ -18,6 +18,7 @@
 //
 
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <time.h> // [crispy] strftime, localtime
@@ -163,6 +164,17 @@ extern boolean speedkeydown (void);
 
 #define SPACEWIDTH        4
 
+// [crispy] UMAPINFO support
+typedef struct
+{
+    short x;
+    short y;
+    short w;
+    short h;
+} mrect_t;
+
+int     epi;
+
 //
 // MENU TYPEDEFS
 //
@@ -185,6 +197,7 @@ typedef struct
     // hotkey in menu
     char	alphaKey;			
     const char	*alttext; // [crispy] alternative text for menu items
+    mrect_t rect;
 } menuitem_t;
 
 
@@ -324,13 +337,26 @@ enum
     ep_end
 } episodes_e;
 
-menuitem_t EpisodeMenu[]=
+// [crispy] UMAPINFO support
+#define MAX_EPISODES 10
+#define M_Y_EPISODES 63
+#define EPISODES_RECT(n) {0, M_Y_EPISODES + (n) * LINEHEIGHT, ORIGWIDTH, LINEHEIGHT}
+
+static menuitem_t EpisodeMenu[MAX_EPISODES] = // added a few free entries for UMAPINFO
 {
-    {1,"M_EPI1", M_Episode,'k'},
-    {1,"M_EPI2", M_Episode,'t'},
-    {1,"M_EPI3", M_Episode,'i'},
-    {1,"M_EPI4", M_Episode,'t'}
+    {1, "M_EPI1", M_Episode, 'k', "Knee-Deep in the Dead", EPISODES_RECT(0)},
+    {1, "M_EPI2", M_Episode, 't', "The Shores of Hell",    EPISODES_RECT(1)},
+    {1, "M_EPI3", M_Episode, 'i', "Inferno",               EPISODES_RECT(2)},
+    {1, "M_EPI4", M_Episode, 't', "Thy Flesh Consumed",    EPISODES_RECT(3)},
+    {1, "",       M_Episode, '0', NULL, EPISODES_RECT(4)},
+    {1, "",       M_Episode, '0', NULL, EPISODES_RECT(5)},
+    {1, "",       M_Episode, '0', NULL, EPISODES_RECT(6)},
+    {1, "",       M_Episode, '0', NULL, EPISODES_RECT(7)},
+    {1, "",       M_Episode, '0', NULL, EPISODES_RECT(8)},
+    {1, "",       M_Episode, '0', NULL, EPISODES_RECT(9)}
 };
+
+#undef EPISODES_RECT
 
 menu_t  EpiDef =
 {
@@ -338,7 +364,7 @@ menu_t  EpiDef =
     &MainDef,		// previous menu
     EpisodeMenu,	// menuitem_t ->
     M_DrawEpisode,	// drawing routine ->
-    48,63,              // x,y
+    48, M_Y_EPISODES,	// x,y
     ep1			// lastOn
 };
 
@@ -1313,18 +1339,21 @@ void M_NewGame(int choice)
     }
 	
     // Chex Quest disabled the episode select screen, as did Doom II.
+    // [crispy] UMAPINFO support
 
-    if (gamemode == commercial || gameversion == exe_chex)
+    if (((gamemode == commercial || gameversion == exe_chex) && !mapinfo_episodes) || EpiDef.numitems <= 1)
 	M_SetupNextMenu(&NewDef);
     else
+    {
+	epi = 0;
 	M_SetupNextMenu(&EpiDef);
+    }
 }
 
 
 //
 //      M_Episode
 //
-int     epi;
 
 void M_DrawEpisode(void)
 {
@@ -1332,10 +1361,11 @@ void M_DrawEpisode(void)
     inhelpscreens = true;
 
     if (W_CheckNumForName(DEH_String("M_EPISOD")) != -1)
-    V_DrawPatchDirect(54, 38, W_CacheLumpName(DEH_String("M_EPISOD"), PU_CACHE));
+    // [crispy] UMAPINFO support
+    V_DrawPatchDirect(54, EpiDef.y - 25, W_CacheLumpName(DEH_String("M_EPISOD"), PU_CACHE));
     else
     {
-      M_WriteText(54, 38, "Which Episode?");
+      M_WriteText(54, EpiDef.y - 25, "Which Episode?");
       EpiDef.lumps_missing = 1;
     }
 }
@@ -1381,7 +1411,7 @@ void M_Episode(int choice)
 // [cirpsy] UMAPINFO support
 //
 
-boolean mapinfo_episodes;
+boolean mapinfo_episodes = false;
 static short EpiMenuMap[MAX_EPISODES] = {1, 1, 1, 1, -1, -1, -1, -1, -1, -1};
 static short EpiMenuEpi[MAX_EPISODES] = {1, 2, 3, 4, -1, -1, -1, -1, -1, -1};
 
@@ -1426,11 +1456,11 @@ void MN_AddEpisode(const char *map, const char *gfx, const char *txt, char key)
 
     if (EpiDef.numitems <= 4)
     {
-        EpiDef.y = 63;
+        EpiDef.y = M_Y_EPISODES;
     }
     else
     {
-        EpiDef.y = MAX(25, 63 - (EpiDef.numitems - 4) * (LINEHEIGHT / 2));
+        EpiDef.y = MAX(25, M_Y_EPISODES - (EpiDef.numitems - 4) * (LINEHEIGHT / 2));
     }
 }
 
@@ -3387,7 +3417,11 @@ void M_Init (void)
         MainMenu[readthis] = MainMenu[quitdoom];
         MainDef.numitems--;
         MainDef.y += 8;
-        NewDef.prevMenu = &MainDef;
+        // [crispy] UMAPINFO support
+        if (!mapinfo_episodes || EpiDef.numitems <= 1)
+        {
+            NewDef.prevMenu = &MainDef;
+        }
         ReadDef1.routine = M_DrawReadThisCommercial;
         ReadDef1.x = 330;
         ReadDef1.y = 165;
@@ -3398,7 +3432,7 @@ void M_Init (void)
     // three episodes; if we're emulating one of those then don't try
     // to show episode four. If we are, then do show episode four
     // (should crash if missing).
-    if (gameversion < exe_ultimate)
+    if (gameversion < exe_ultimate && !mapinfo_episodes) // [crispy]
     {
         EpiDef.numitems--;
     }
