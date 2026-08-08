@@ -97,7 +97,7 @@ m_cheat.c            m_cheat.h             \
 m_config.c           m_config.h            \
 m_controls.c         m_controls.h          \
 m_fixed.c            m_fixed.h             \
-m_scanner.c          m_scanner.h
+m_scanner.c          m_scanner.h           \
 net_client.c         net_client.h          \
 net_common.c         net_common.h          \
 net_dedicated.c      net_dedicated.h       \
