@@ -2824,6 +2824,7 @@ G_InitNew
     gameepisode = episode;
     gamemap = map;
     gameskill = skill;
+    gamemapinfo = G_LookupMapinfo(episode, gamemap);
 
     // [crispy] CPhipps - total time for all completed levels
     totalleveltimes = 0;
