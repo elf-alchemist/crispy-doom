@@ -189,28 +189,45 @@ static boolean MapInfo_Ticker()
 
     next_level = false;
 
-    WI_checkForAccelerate();
-
-    // advance animation
-    finalecount++;
-
-    if (finalestage == F_STAGE_CAST)
+    if (!critical->singleplayer  || (!demorecording && !demoplayback))
     {
-        F_CastTicker();
-        return true;
+        WI_checkForAccelerate();
     }
-    else if (finalestage == F_STAGE_TEXT)
+    else
     {
-        int textcount = 0;
-        if (finaletext)
+        for (int i = 0; i < MAXPLAYERS; ++i)
         {
-            float speed = critical->singleplayer ? TEXTSPEED : GetTextSpeed();
-            textcount = strlen(finaletext) * speed + (midstage ? NEWTEXTWAIT : TEXTWAIT);
+            gameaction = ga_worlddone;
+            if (players[i].cmd.buttons)
+            {
+                next_level = true;
+            }
         }
+    }
 
-        if (!textcount || finalecount > textcount || (midstage && acceleratestage))
+    if (!next_level)
+    {
+        // advance animation
+        finalecount++;
+
+        if (finalestage == F_STAGE_CAST)
         {
-            next_level = true;
+            F_CastTicker();
+            return true;
+        }
+        else if (finalestage == F_STAGE_TEXT)
+        {
+            int textcount = 0;
+            if (finaletext)
+            {
+                float speed = critical->singleplayer ? TEXTSPEED : GetTextSpeed();
+                textcount = strlen(finaletext) * speed + (midstage ? NEWTEXTWAIT : TEXTWAIT);
+            }
+
+            if (!textcount || finalecount > textcount || (midstage && acceleratestage))
+            {
+                next_level = true;
+            }
         }
     }
 
