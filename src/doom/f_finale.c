@@ -123,7 +123,7 @@ extern void A_RandomJump(void *, void *, void *);
 // UMAPINFO
 //
 
-boolean mapinfo_finale;
+boolean mapinfo_finale = false;
 
 static boolean MapInfo_StartFinale(void)
 {
@@ -189,7 +189,7 @@ static boolean MapInfo_Ticker()
 
     next_level = false;
 
-    if (!critical->singleplayer  || (!demorecording && !demoplayback))
+    if (!critical->singleplayer)
     {
         WI_checkForAccelerate();
     }
