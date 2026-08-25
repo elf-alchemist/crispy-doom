@@ -189,7 +189,7 @@ static boolean MapInfo_Ticker()
 
     next_level = false;
 
-    if (!critical->singleplayer)
+    if (critical->singleplayer)
     {
         WI_checkForAccelerate();
     }
@@ -220,7 +220,7 @@ static boolean MapInfo_Ticker()
             int textcount = 0;
             if (finaletext)
             {
-                float speed = critical->singleplayer ? TEXTSPEED : GetTextSpeed();
+                float speed = !critical->singleplayer ? TEXTSPEED : GetTextSpeed();
                 textcount = strlen(finaletext) * speed + (midstage ? NEWTEXTWAIT : TEXTWAIT);
             }
 
@@ -395,7 +395,7 @@ void F_Ticker(void)
         return;
     }
 
-    if (!critical->singleplayer)
+    if (critical->singleplayer)
     {
         WI_checkForAccelerate(); // killough 3/28/98: check for acceleration
     }
@@ -416,7 +416,7 @@ void F_Ticker(void)
 
     if (finalestage == F_STAGE_TEXT)
     {
-        float speed = critical->singleplayer ? TEXTSPEED : GetTextSpeed();
+        float speed = !critical->singleplayer ? TEXTSPEED : GetTextSpeed();
         // phares
         // killough 2/28/98
         // changed to allow acceleration
@@ -435,7 +435,7 @@ void F_Ticker(void)
                     S_StartMusic(mus_bunny);
             }
             // you must press a button to continue in Doom 2
-            else if (!critical->singleplayer && midstage)
+            else if (critical->singleplayer && midstage)
             {
             next_level:
                 if (gamemap == 30)
