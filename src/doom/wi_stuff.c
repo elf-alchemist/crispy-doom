@@ -21,6 +21,7 @@
 
 #include "hu_stuff.h"
 #include "g_umapinfo.h"
+#include "i_video.h"
 #include "m_menu.h"
 #include "v_trans.h"
 #include "z_zone.h"
@@ -501,24 +502,24 @@ void WI_drawEL(void)
 
         // If the levelpic graphics lump is not fullscreen,
         // draw it right below the "entering" graphics lump
-        if (SHORT(patch->height) < SCREENHEIGHT)
+        if (SHORT(patch->height) < ORIGHEIGHT)
         {
             y += (5 * SHORT(entering->height)) / 4;
         }
 
-        V_DrawPatch((SCREENWIDTH - SHORT(patch->width)) / 2, y, patch);
+        V_DrawPatch((ORIGWIDTH - SHORT(patch->width)) / 2, y, patch);
     }
     // [FG] prevent crashes for levels without name graphics
     else if (wbs->next >= 0 && wbs->next < num_lnames && lnames[wbs->next])
     {
         // draw level
         // haleyjd: corrected to use height of entering, not map name
-        if (SHORT(lnames[wbs->next]->height) < SCREENHEIGHT)
+        if (SHORT(lnames[wbs->next]->height) < ORIGHEIGHT)
         {
             y += (5 * SHORT(entering->height)) / 4;
         }
 
-        V_DrawPatch((SCREENWIDTH - SHORT(lnames[wbs->next]->width)) / 2, y,
+        V_DrawPatch((ORIGWIDTH - SHORT(lnames[wbs->next]->width)) / 2, y,
                     lnames[wbs->next]);
     }
 
