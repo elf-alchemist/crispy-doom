@@ -725,7 +725,6 @@ static void ProcessInWad(int i, const char *name, void (*process)(int lumpnum),
 
         if (condition && !strncasecmp(lumpinfo[i]->name, name, 8))
         {
-            // printf("Processing %s on WAD %s\n", name, lumpinfo[i]->wad_file->path);
             process(i);
         }
     }
