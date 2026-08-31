@@ -390,7 +390,6 @@ void S_Start(void)
     if (gamemapinfo && gamemapinfo->music[0])
     {
         int muslump = W_CheckNumForName(gamemapinfo->music);
-        printf("Found mapinfo song %s\n", gamemapinfo->music);
         if (muslump >= 0)
         {
             S_ChangeMusInfoMusic(muslump, true);
