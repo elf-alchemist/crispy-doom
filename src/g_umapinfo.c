@@ -947,13 +947,6 @@ mapentry_t *G_LookupMapinfo(int episode, int map)
         }
     }
 
-    printf("Did not find mapinfo definition for level %s\n", lumpname);
-    printf("Did not find mapinfo definition for level %s\n", lumpname);
-    printf("Did not find mapinfo definition for level %s\n", lumpname);
-    printf("Did not find mapinfo definition for level %s\n", lumpname);
-    printf("Did not find mapinfo definition for level %s\n", lumpname);
-    printf("Did not find mapinfo definition for level %s\n", lumpname);
-
     return NULL;
 }
 
