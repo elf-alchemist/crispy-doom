@@ -3703,7 +3703,7 @@ void MN_DrawStringCR(int cx, int cy, byte *xlat, const char *ch)
         }
 
         w = SHORT(hu_font[c]->width);
-        if (cx + w > SCREENWIDTH)
+        if (cx + w > ORIGWIDTH)
         {
             break;
         }

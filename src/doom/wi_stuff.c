@@ -1568,7 +1568,7 @@ void WI_drawStats(void)
                                 (wbs->epsd < 3 || mapinfo_partimes);
     // [FG] choose x-position depending on width of time string
     const boolean wide_total = (cnt_total_time > 61*59) ||
-                              (SP_TIMEX + SHORT(total->width) >= SCREENWIDTH/4);
+                              (SP_TIMEX + SHORT(total->width) >= ORIGWIDTH/4);
     const boolean wide_time = (wide_total && !draw_partime);
 
     WI_slamBackground();
@@ -1591,7 +1591,7 @@ void WI_drawStats(void)
     // Why add a hardcoded +8 you ask?
     // in oder to allow >1h long times, some minor alignment shifting is needed
     // i.e. PrBoom switched SP_TIMEX to 8, instead of vanilla's 16
-    WI_drawTime((wide_time ? (SCREENWIDTH - SP_TIMEX) : (SCREENWIDTH/2 + 8)),
+    WI_drawTime((wide_time ? (ORIGWIDTH - SP_TIMEX) : (ORIGWIDTH/2 + 8)),
                 SP_TIMEY, cnt_time, true);
 
     // [crispy] conditionally draw par times on intermission screen
@@ -1606,7 +1606,7 @@ void WI_drawStats(void)
     {
 	V_DrawPatch(SP_TIMEX, SP_TIMEY + 16, total);
 	// [crispy] choose x-position depending on width of time string
-	WI_drawTime((wide_total ? (SCREENWIDTH - SP_TIMEX) : (SCREENWIDTH/2 + 8)),
+	WI_drawTime((wide_total ? (ORIGWIDTH - SP_TIMEX) : (ORIGWIDTH/2 + 8)),
 	            SP_TIMEY + 16, cnt_total_time, false);
     }
 
